@@ -1,0 +1,22 @@
+Uwaga: dotyczy strony: http://localhost:3000/produkty
+
+Use Case 1:
+Panel filtrowania - po lewej stronie:
+a) Kategorie - ze słownika, który ułożyliśmy w Admin
+W tym boxie dodałbym jeszcze dropdown z porducentem - default to wszystkie, ale użytkownik może
+rozwinąć dropdown z multiselectem.
+b) Cena - podobnie jak na Allegro, użytkownik wpisuje OD DO - bez suwaka!
+c) Dostępność może zostać
+
+Use Case 2:
+Wyświetlanie kart produktów - w moim sklepie może być kilkaset produktów.
+Załadowanie ich na stronie - po przejściu na prodkuty spowoduje, że wyrenderuje mi się kilkaset kart.
+Czy możemy renderować np. 12 produktów z linkiem do kolejnych 12ty, etc.
+
+Use Case 3:
+Dodanie filtra - na prawo od opsiu "Nasze produkty" - nad sekcją z kartami produktów. Uzytkownik może
+wpisać czego szuka a filtrowana będzie sekcja z kartami produktów.
+
+Use Case 4:
+Dodawanie produktów do koszyka - po kliknięciu na "Dodaj do koszyka" pojawi się modal z informacją, że produkt
+został dodany do koszyka i faktycznie zajdzie takie zdarzenie.
