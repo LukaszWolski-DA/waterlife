@@ -18,11 +18,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { productSchema } from '@/lib/validations';
 import type { ProductFormData } from '@/types/product';
 import { z } from 'zod';
-import { ImageUpload } from '@/components/admin/ImageUpload';
+import { MultiImageUpload } from '@/components/admin/MultiImageUpload';
+import type { ProductImage } from '@/types/product';
 
 /**
  * Formularz dodawania/edycji produktu
@@ -54,6 +56,8 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     category: '',
     manufacturer: '',
     imageUrl: '',
+    images: [],
+    featured: false,
   });
 
   // Load categories, manufacturers and product data
@@ -71,6 +75,12 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     if (mode === 'edit' && productId) {
       const product = getProduct(productId);
       if (product) {
+        // Migracja: jeśli produkt ma tylko imageUrl, przekonwertuj na nowy format
+        let images: ProductImage[] = product.images || [];
+        if (images.length === 0 && product.imageUrl) {
+          images = [{ url: product.imageUrl, isMain: true }];
+        }
+
         setFormData({
           name: product.name,
           description: product.description || '',
@@ -79,6 +89,8 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           category: product.category || '',
           manufacturer: product.manufacturer || '',
           imageUrl: product.imageUrl || '',
+          images: images,
+          featured: product.featured || false,
         });
       }
     }
@@ -357,22 +369,42 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           </div>
 
           <div>
-            <Label>Zdjęcie produktu</Label>
-            <ImageUpload
-              value={formData.imageUrl}
-              onChange={(url) => {
-                setFormData((prev) => ({ ...prev, imageUrl: url }));
-                if (errors.imageUrl) {
-                  setErrors((prev) => ({ ...prev, imageUrl: '' }));
+            <Label>Zdjęcia produktu (max 3)</Label>
+            <p className="text-sm text-muted-foreground mb-2">
+              Kliknij gwiazdkę, aby ustawić zdjęcie główne wyświetlane na liście produktów
+            </p>
+            <MultiImageUpload
+              value={formData.images || []}
+              onChange={(images) => {
+                // Znajdź główne zdjęcie dla kompatybilności wstecznej
+                const mainImage = images.find(img => img.isMain);
+                setFormData((prev) => ({
+                  ...prev,
+                  images,
+                  imageUrl: mainImage?.url || images[0]?.url || '',
+                }));
+                if (errors.images) {
+                  setErrors((prev) => ({ ...prev, images: '' }));
                 }
               }}
-              onRemove={() => {
-                setFormData((prev) => ({ ...prev, imageUrl: '' }));
+              maxImages={3}
+            />
+            {errors.images && (
+              <p className="mt-1 text-sm text-destructive">{errors.images}</p>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="featured"
+              checked={formData.featured || false}
+              onCheckedChange={(checked) => {
+                setFormData((prev) => ({ ...prev, featured: checked === true }));
               }}
             />
-            {errors.imageUrl && (
-              <p className="mt-1 text-sm text-destructive">{errors.imageUrl}</p>
-            )}
+            <Label htmlFor="featured" className="cursor-pointer">
+              Bestseller - produkt wyświetlany na stronie głównej
+            </Label>
           </div>
 
           <div className="flex gap-4">

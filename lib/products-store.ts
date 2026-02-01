@@ -1,4 +1,4 @@
-import type { Product, ProductFormData } from '@/types/product';
+import type { Product, ProductFormData, ProductImage } from '@/types/product';
 import { getAllProducts as getMockProducts } from './mock-products';
 import { initializeManufacturersStore, getManufacturerNames } from './manufacturers-store';
 
@@ -79,6 +79,20 @@ export function createProduct(data: ProductFormData): Product {
     // Generate unique ID
     const id = Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
 
+    // Obsługa nowej struktury images z kompatybilnością wsteczną
+    let images: ProductImage[] = data.images || [];
+    let mainImageUrl = '';
+
+    if (images.length > 0) {
+      // Nowa struktura - znajdź główne zdjęcie
+      const mainImage = images.find(img => img.isMain);
+      mainImageUrl = mainImage?.url || images[0]?.url || '';
+    } else if (data.imageUrl) {
+      // Legacy - konwertuj pojedyncze imageUrl na nowy format
+      images = [{ url: data.imageUrl, isMain: true }];
+      mainImageUrl = data.imageUrl;
+    }
+
     const newProduct: Product = {
       id,
       name: data.name,
@@ -86,8 +100,9 @@ export function createProduct(data: ProductFormData): Product {
       price: data.price,
       stock: data.stock,
       category: data.category,
-      imageUrl: data.imageUrl,
-      images: data.imageUrl ? [data.imageUrl] : [],
+      manufacturer: data.manufacturer,
+      imageUrl: mainImageUrl,
+      images: images,
       featured: false,
       status: data.stock > 0 ? 'active' : 'out_of_stock',
       createdAt: new Date().toISOString(),
@@ -122,20 +137,32 @@ export function updateProduct(id: string, data: Partial<ProductFormData>): Produ
       return null;
     }
 
+    // Obsługa aktualizacji images z kompatybilnością wsteczną
+    let newImages: ProductImage[] | undefined = products[index].images;
+    let newImageUrl: string | undefined = products[index].imageUrl;
+
+    if (data.images !== undefined) {
+      // Nowa struktura images
+      newImages = data.images;
+      const mainImage = data.images.find(img => img.isMain);
+      newImageUrl = mainImage?.url || data.images[0]?.url || '';
+    } else if (data.imageUrl !== undefined) {
+      // Legacy - pojedyncze imageUrl
+      newImageUrl = data.imageUrl;
+      newImages = data.imageUrl ? [{ url: data.imageUrl, isMain: true }] : [];
+    }
+
     const updatedProduct: Product = {
       ...products[index],
       ...data,
+      imageUrl: newImageUrl,
+      images: newImages,
       updatedAt: new Date().toISOString(),
     };
 
     // Update status based on stock
     if (data.stock !== undefined) {
       updatedProduct.status = data.stock > 0 ? 'active' : 'out_of_stock';
-    }
-
-    // Update images array if imageUrl changed
-    if (data.imageUrl) {
-      updatedProduct.images = [data.imageUrl];
     }
 
     products[index] = updatedProduct;

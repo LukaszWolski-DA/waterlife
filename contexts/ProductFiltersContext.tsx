@@ -29,14 +29,19 @@ interface ProductFiltersContextType {
 
 const ProductFiltersContext = createContext<ProductFiltersContextType | undefined>(undefined);
 
-export function ProductFiltersProvider({ children }: { children: ReactNode }) {
+interface ProductFiltersProviderProps {
+  children: ReactNode;
+  initialSearchQuery?: string;
+}
+
+export function ProductFiltersProvider({ children, initialSearchQuery = '' }: ProductFiltersProviderProps) {
   const [filters, setFilters] = useState<ProductFiltersState>({
     categories: [],
     manufacturers: [],
     minPrice: null,
     maxPrice: null,
     inStock: null,
-    searchQuery: '',
+    searchQuery: initialSearchQuery,
     currentPage: 1,              // Start at page 1
     itemsPerPage: 12,             // 12 products per page
   });

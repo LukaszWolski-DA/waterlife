@@ -27,18 +27,18 @@ export default function CartItem({ item, onRemove, onUpdateQuantity }: CartItemP
 
   return (
     <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow">
-      {/* Zdjęcie produktu */}
+      {/* Zdjecie produktu */}
       <div className="w-24 h-24 bg-gray-100 rounded-lg relative flex-shrink-0">
         {item.imageUrl ? (
           <Image
             src={item.imageUrl}
             alt={item.name}
             fill
-            className="object-cover rounded-lg"
+            className="object-contain rounded-lg"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-            Brak zdjęcia
+            Brak zdjecia
           </div>
         )}
       </div>

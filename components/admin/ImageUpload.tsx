@@ -136,12 +136,12 @@ export function ImageUpload({ value, onChange, onRemove }: ImageUploadProps) {
     <div className="space-y-4">
       {preview ? (
         <div className="relative w-full">
-          <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-lg border">
+          <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-lg border bg-gray-100">
             <Image
               src={preview}
               alt="Product preview"
               fill
-              className="object-cover"
+              className="object-contain"
             />
           </div>
           <Button

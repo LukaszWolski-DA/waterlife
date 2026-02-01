@@ -26,7 +26,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import type { Product } from '@/types/product';
+import type { Product, ProductImage } from '@/types/product';
+
+// Helper do pobierania glownego zdjecia
+function getMainImageUrl(product: Product): string | undefined {
+  if (product.images && product.images.length > 0) {
+    const mainImage = product.images.find(img => img.isMain);
+    return mainImage?.url || product.images[0]?.url;
+  }
+  return product.imageUrl;
+}
 
 /**
  * Strona listy produktów w panelu admina
@@ -206,12 +215,12 @@ export default function AdminProductsPage() {
                     <TableRow key={product.id}>
                       <TableCell>
                         <div className="relative h-16 w-16 overflow-hidden rounded-md bg-gray-100">
-                          {product.imageUrl ? (
+                          {getMainImageUrl(product) ? (
                             <Image
-                              src={product.imageUrl}
+                              src={getMainImageUrl(product)!}
                               alt={product.name}
                               fill
-                              className="object-cover"
+                              className="object-contain"
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center text-xs text-gray-400">

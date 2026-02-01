@@ -11,7 +11,16 @@ import { getAllProducts, initializeStore } from "@/lib/products-store";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { formatPriceWithCurrency } from "@/lib/format-price";
-import type { Product } from "@/types/product";
+import type { Product, ProductImage } from "@/types/product";
+
+// Helper do pobierania glownego zdjecia
+function getMainImageUrl(product: Product): string | undefined {
+  if (product.images && product.images.length > 0) {
+    const mainImage = product.images.find(img => img.isMain);
+    return mainImage?.url || product.images[0]?.url;
+  }
+  return product.imageUrl;
+}
 
 // Mapowanie kategorii na ikony
 const categoryIcons: Record<string, any> = {
@@ -29,19 +38,21 @@ export function ProductsSection() {
   useEffect(() => {
     initializeStore();
     const allProducts = getAllProducts();
-    // Get featured products or first 6
+    // Get only bestsellers (featured === true), sorted by price descending, max 6
     const featuredProducts = allProducts
-      .filter(p => p.featured || p.status === 'active')
+      .filter(p => p.featured === true && p.status === 'active')
+      .sort((a, b) => b.price - a.price)
       .slice(0, 6);
     setProducts(featuredProducts);
   }, []);
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
+    const mainImageUrl = getMainImageUrl(product);
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
-      imageUrl: product.imageUrl,
+      imageUrl: mainImageUrl,
     });
 
     toast({
@@ -80,16 +91,16 @@ export function ProductsSection() {
                 className="group overflow-hidden border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
               >
                 <CardContent className="p-0">
-                  <div className="relative aspect-square">
-                    {product.imageUrl ? (
+                  <div className="relative aspect-square bg-gray-100">
+                    {getMainImageUrl(product) ? (
                       <Image
-                        src={product.imageUrl}
+                        src={getMainImageUrl(product)!}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
                     ) : (
-                      <div className="bg-muted w-full h-full flex items-center justify-center">
+                      <div className="bg-gray-100 w-full h-full flex items-center justify-center">
                         <div className="bg-primary/10 rounded-full p-8">
                           <IconComponent className="h-16 w-16 text-primary" />
                         </div>

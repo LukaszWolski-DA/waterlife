@@ -8,10 +8,11 @@ import { formatPrice } from '@/lib/format-price';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart } from 'lucide-react';
+import type { ProductImage } from '@/types/product';
 
 /**
  * Karta produktu - miniatura
- * Wyświetla zdjęcie, nazwę, cenę i przycisk dodania do koszyka
+ * Wyswietla zdjecie, nazwe, cene i przycisk dodania do koszyka
  */
 interface ProductCardProps {
   product: {
@@ -19,6 +20,7 @@ interface ProductCardProps {
     name: string;
     price: number;
     imageUrl?: string;
+    images?: ProductImage[];
     description?: string;
   };
 }
@@ -27,19 +29,30 @@ export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCart((state) => state.addItem);
   const { toast } = useToast();
 
+  // Pobierz glowne zdjecie z tablicy images lub fallback do imageUrl
+  const getMainImageUrl = (): string | undefined => {
+    if (product.images && product.images.length > 0) {
+      const mainImage = product.images.find(img => img.isMain);
+      return mainImage?.url || product.images[0]?.url;
+    }
+    return product.imageUrl;
+  };
+
+  const mainImageUrl = getMainImageUrl();
+
   const handleAddToCart = () => {
     // Add product to cart
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
-      imageUrl: product.imageUrl,
+      imageUrl: mainImageUrl,
     });
 
     // Show toast confirmation
     toast({
       title: "Dodano do koszyka",
-      description: `${product.name} został dodany do koszyka.`,
+      description: `${product.name} zostal dodany do koszyka.`,
     });
   };
 
@@ -47,16 +60,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="overflow-hidden hover:shadow-lg transition">
       <Link href={`/produkty/${product.id}`}>
         <div className="aspect-square bg-gray-100 relative">
-          {product.imageUrl ? (
+          {mainImageUrl ? (
             <Image
-              src={product.imageUrl}
+              src={mainImageUrl}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-contain"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
-              Brak zdjęcia
+              Brak zdjecia
             </div>
           )}
         </div>

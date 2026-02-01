@@ -11,10 +11,9 @@ import {
   Phone,
   Mail,
   ShoppingCart,
-  User,
-  Search,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { HeaderSearchBar } from "@/components/HeaderSearchBar";
+import { UserDropdown } from "@/components/UserDropdown";
 import { useCart } from "@/hooks/useCart";
 
 const navigation = [
@@ -118,20 +117,12 @@ export function Header() {
 
           {/* Search & Actions */}
           <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Szukaj produktów..."
-                  className="pl-10 w-[200px] lg:w-[280px]"
-                />
-              </div>
-            </div>
+            {/* Ukryj wyszukiwarke na stronie /produkty - ma dedykowana */}
+            {pathname !== '/produkty' && (
+              <HeaderSearchBar className="hidden md:block w-[200px] lg:w-[280px]" />
+            )}
 
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Konto</span>
-            </Button>
+            <UserDropdown className="hidden md:flex" />
 
             <Button variant="ghost" size="icon" className="relative" asChild>
               <Link href="/koszyk">
@@ -153,10 +144,10 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px]">
                 <div className="flex flex-col gap-4 mt-8">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Szukaj produktów..." className="pl-10" />
-                  </div>
+                  {/* Ukryj wyszukiwarke na stronie /produkty - ma dedykowana */}
+                  {pathname !== '/produkty' && (
+                    <HeaderSearchBar onSearch={() => setIsOpen(false)} />
+                  )}
                   <nav className="flex flex-col gap-2">
                     {navigation.map((item) => {
                       const isSectionLink = item.href.startsWith('#');
@@ -190,6 +181,13 @@ export function Header() {
                       );
                     })}
                   </nav>
+                  {/* User section */}
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-sm font-medium mb-2">Twoje konto</p>
+                    <UserDropdown />
+                  </div>
+
+                  {/* Contact section */}
                   <div className="border-t pt-4 mt-4">
                     <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                       <a

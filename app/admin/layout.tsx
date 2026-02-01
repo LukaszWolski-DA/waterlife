@@ -11,7 +11,7 @@ import Navigation from '@/components/layout/Navigation';
  * Chroni wszystkie ścieżki /admin przed nieautoryzowanym dostępem
  */
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -21,17 +21,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Redirect to login if not authenticated
-    if (!loading && !isAuthenticated) {
+    // Redirect to login if not authenticated or not admin
+    if (!loading && (!isAuthenticated || !isAdmin)) {
       router.push('/admin/login');
     }
-  }, [isAuthenticated, loading, pathname, router]);
+  }, [isAuthenticated, isAdmin, loading, pathname, router]);
 
   // Show loading state while checking auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg text-gray-600">Ładowanie...</div>
+        <div className="text-lg text-gray-600">Ladowanie...</div>
       </div>
     );
   }
@@ -41,8 +41,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  // Redirect happening - show nothing
-  if (!isAuthenticated) {
+  // Redirect happening - show nothing (not authenticated or not admin)
+  if (!isAuthenticated || !isAdmin) {
     return null;
   }
 

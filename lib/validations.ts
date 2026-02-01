@@ -5,6 +5,14 @@ import { z } from 'zod';
  * Używane do walidacji danych z formularzy i API
  */
 
+// Schema pojedynczego zdjęcia produktu
+export const productImageSchema = z.object({
+  url: z.string().min(1, 'URL obrazu jest wymagany'),
+  isMain: z.boolean(),
+});
+
+export type ProductImageInput = z.infer<typeof productImageSchema>;
+
 // Schema produktu
 export const productSchema = z.object({
   name: z.string().min(3, 'Nazwa musi mieć minimum 3 znaki'),
@@ -13,7 +21,14 @@ export const productSchema = z.object({
   stock: z.number().int().min(0, 'Stan magazynowy musi być liczbą całkowitą >= 0'),
   category: z.string().optional(),
   manufacturer: z.string().optional(),
-  imageUrl: z.string().optional().or(z.literal('')), // Accepts both URLs and local paths
+  imageUrl: z.string().optional().or(z.literal('')), // Legacy - zachowane dla kompatybilności
+  images: z.array(productImageSchema)
+    .max(3, 'Maksymalnie 3 zdjęcia')
+    .refine(
+      (images) => images.length === 0 || images.filter(img => img.isMain).length === 1,
+      'Dokładnie jedno zdjęcie musi być oznaczone jako główne'
+    )
+    .optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

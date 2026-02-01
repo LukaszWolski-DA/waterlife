@@ -10,6 +10,9 @@ import type { CategoryIntro, CategoryCard } from "@/types/homepage";
 // Icon mapping for categories
 const categoryIcons = [Flame, Droplets, Leaf];
 
+// ID mapping for anchor links (matches header navigation)
+const categoryIds = ['heating', 'sanitary', 'irrigation'];
+
 export function CategoriesSection() {
   const [intro, setIntro] = useState<CategoryIntro | null>(null);
   const [cards, setCards] = useState<CategoryCard[]>([]);
@@ -49,6 +52,7 @@ export function CategoriesSection() {
         return (
           <section
             key={card.title}
+            id={categoryIds[index]}
             className={`py-20 md:py-28 ${
               index % 2 === 0 ? "bg-background" : "bg-secondary/30"
             }`}

@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated, loading } = useAuth();
+  const { loginAdmin, isAuthenticated, isAdmin, loading } = useAuth();
   const router = useRouter();
 
   // Redirect to admin if already authenticated
@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
     setError('');
     setIsLoading(true);
 
-    const success = await login(username, password);
+    const success = await loginAdmin(username, password);
 
     if (success) {
       router.push('/admin');

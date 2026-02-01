@@ -1,17 +1,21 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ProductList from '@/components/produkty/ProductList';
 import ProductFilters from '@/components/produkty/ProductFilters';
 import SearchBar from '@/components/produkty/SearchBar';
 import { ProductFiltersProvider } from '@/contexts/ProductFiltersContext';
 
 /**
- * Strona z listą wszystkich produktów
- * Zawiera filtry, wyszukiwarkę i grid produktów
+ * Wewnetrzny komponent z logika wyszukiwania
  */
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   return (
-    <ProductFiltersProvider>
+    <ProductFiltersProvider initialSearchQuery={initialSearch}>
       <div className="container mx-auto px-4 py-8">
         {/* Heading with Search Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -32,5 +36,17 @@ export default function ProductsPage() {
         </div>
       </div>
     </ProductFiltersProvider>
+  );
+}
+
+/**
+ * Strona z lista wszystkich produktow
+ * Zawiera filtry, wyszukiwarke i grid produktow
+ */
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Ladowanie...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

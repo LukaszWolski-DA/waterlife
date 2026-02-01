@@ -26,10 +26,12 @@ export default function SearchBar() {
     return () => clearTimeout(timer);
   }, [localSearch, updateFilter]);
 
-  // Sync with context on mount
+  // Sync with context on mount and when initialSearchQuery changes
   useEffect(() => {
-    setLocalSearch(filters.searchQuery || '');
-  }, []);
+    if (filters.searchQuery && !localSearch) {
+      setLocalSearch(filters.searchQuery);
+    }
+  }, [filters.searchQuery]);
 
   const handleClear = () => {
     setLocalSearch('');

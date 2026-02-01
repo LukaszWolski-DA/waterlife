@@ -12,7 +12,8 @@ import { getAllProducts, getProductById, initializeStore } from '@/lib/products-
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { formatPriceWithCurrency } from '@/lib/format-price';
-import type { Product } from '@/types/product';
+import type { Product, ProductImage } from '@/types/product';
+import { ProductGallery } from '@/components/produkty/ProductGallery';
 
 /**
  * Strona szczegółów pojedynczego produktu
@@ -91,27 +92,20 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-        {/* Galeria zdjęć produktu */}
+        {/* Galeria zdjec produktu */}
         <div>
           <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              {product.imageUrl ? (
-                <div className="relative aspect-square w-full">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              ) : (
-                <div className="bg-muted aspect-square flex items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Brak zdjęcia produktu
-                  </p>
-                </div>
-              )}
+            <CardContent className="p-4">
+              <ProductGallery
+                images={
+                  product.images && product.images.length > 0
+                    ? product.images
+                    : product.imageUrl
+                      ? [{ url: product.imageUrl, isMain: true }]
+                      : []
+                }
+                productName={product.name}
+              />
             </CardContent>
           </Card>
         </div>
@@ -204,17 +198,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <Card className="group hover:border-primary/50 transition-all h-full">
                   <CardContent className="p-4">
                     {relatedProduct.imageUrl ? (
-                      <div className="relative aspect-square rounded-lg mb-4 overflow-hidden">
+                      <div className="relative aspect-square rounded-lg mb-4 overflow-hidden bg-gray-100">
                         <Image
                           src={relatedProduct.imageUrl}
                           alt={relatedProduct.name}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     ) : (
-                      <div className="bg-muted aspect-square rounded-lg mb-4 flex items-center justify-center">
-                        <p className="text-xs text-muted-foreground">Brak zdjęcia</p>
+                      <div className="bg-gray-100 aspect-square rounded-lg mb-4 flex items-center justify-center">
+                        <p className="text-xs text-muted-foreground">Brak zdjecia</p>
                       </div>
                     )}
                     <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
