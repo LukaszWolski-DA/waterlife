@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -15,15 +15,27 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 interface LoginModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTab?: 'login' | 'register';
 }
 
-export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+export function LoginModal({ open, onOpenChange, initialTab = 'login' }: LoginModalProps) {
   const { loginUser, registerUser } = useAuth();
   const { toast } = useToast();
+
+  // Active tab state
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
+
+  // Update active tab when modal opens or initialTab changes
+  useEffect(() => {
+    if (open) {
+      setActiveTab(initialTab);
+    }
+  }, [open, initialTab]);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -111,7 +123,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           <DialogTitle>Konto klienta</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Logowanie</TabsTrigger>
             <TabsTrigger value="register">Rejestracja</TabsTrigger>
@@ -141,7 +153,16 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="login-password">Haslo</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="login-password">Haslo</Label>
+                  <Link 
+                    href="/reset-password"
+                    onClick={() => onOpenChange(false)}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Zapomniałeś hasła?
+                  </Link>
+                </div>
                 <Input
                   id="login-password"
                   type="password"

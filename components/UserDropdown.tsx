@@ -12,8 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, ShoppingBag } from 'lucide-react';
 import { LoginModal } from '@/components/LoginModal';
+import Link from 'next/link';
 
 interface UserDropdownProps {
   className?: string;
@@ -23,6 +24,7 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
   const { isAuthenticated, user, logout } = useAuth();
   const { toast } = useToast();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState<'login' | 'register'>('login');
 
   const handleLogout = () => {
     logout();
@@ -68,6 +70,13 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/profil/zamowienia">
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                  Moje zamowienia
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 Wyloguj sie
@@ -77,11 +86,17 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
             <>
               <DropdownMenuLabel>Konto klienta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setLoginModalOpen(true)}>
+              <DropdownMenuItem onClick={() => {
+                setModalInitialTab('login');
+                setLoginModalOpen(true);
+              }}>
                 <LogIn className="mr-2 h-4 w-4" />
                 Zaloguj sie
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLoginModalOpen(true)}>
+              <DropdownMenuItem onClick={() => {
+                setModalInitialTab('register');
+                setLoginModalOpen(true);
+              }}>
                 <UserPlus className="mr-2 h-4 w-4" />
                 Zaloz konto
               </DropdownMenuItem>
@@ -90,7 +105,11 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
+      <LoginModal 
+        open={loginModalOpen} 
+        onOpenChange={setLoginModalOpen}
+        initialTab={modalInitialTab}
+      />
     </>
   );
 }

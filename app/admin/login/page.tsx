@@ -11,33 +11,43 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { loginAdmin, isAuthenticated, isAdmin, loading } = useAuth();
+  const { loginUser, isAuthenticated, isAdmin, loading, logout } = useAuth();
   const router = useRouter();
 
-  // Redirect to admin if already authenticated
+  // Handle redirects and access control
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push('/admin');
+      if (isAdmin) {
+        // Admin logged in - redirect to admin panel
+        router.push('/admin');
+      } else {
+        // Non-admin logged in - logout and show error
+        logout();
+        setError('Brak uprawnień administratora');
+        setIsLoading(false);
+      }
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, isAdmin, loading, router, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    const success = await loginAdmin(username, password);
+    const result = await loginUser(email, password);
 
-    if (success) {
-      router.push('/admin');
-    } else {
-      setError('Nieprawidłowa nazwa użytkownika lub hasło');
+    if (!result.success) {
+      setError(result.error || 'Nieprawidłowe dane logowania');
       setIsLoading(false);
+      return;
     }
+
+    // Profile will load via onAuthStateChange, useEffect will handle redirect
+    // Keep isLoading=true to show loading state
   };
 
   // Show loading state while checking authentication
@@ -73,13 +83,13 @@ export default function AdminLoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">Nazwa użytkownika</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="waterlife"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="admin@waterlife.net.pl"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
                 autoFocus

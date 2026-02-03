@@ -14,7 +14,7 @@ export function StatsSection() {
   }, []);
 
   return (
-    <section className="py-16 bg-primary">
+    <section className="py-16 bg-primary" suppressHydrationWarning>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (

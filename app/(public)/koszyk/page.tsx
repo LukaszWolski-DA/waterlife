@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CartItem from '@/components/koszyk/CartItem';
 import CartSummary from '@/components/koszyk/CartSummary';
 import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Send } from 'lucide-react';
@@ -18,6 +19,7 @@ import { Send } from 'lucide-react';
  */
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
+  const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,6 +32,23 @@ export default function CartPage() {
     message: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Autouzupełnianie formularza dla zalogowanych użytkowników
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Rozdziel full name na imię i nazwisko
+      const nameParts = user.name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || ''; // Reszta to nazwisko (może być wieloczłonowe)
+
+      setFormData((prev) => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: user.email,
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -80,6 +99,8 @@ export default function CartPage() {
           customer: formData,
           items,
           total,
+          userId: user?.id || null,
+          isGuest: !isAuthenticated,
         }),
       });
 

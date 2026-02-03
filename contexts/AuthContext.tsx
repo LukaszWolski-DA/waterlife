@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-// Typ uzytkownika
 interface User {
   id: string;
   name: string;
@@ -10,19 +11,11 @@ interface User {
   type: 'admin' | 'user';
 }
 
-// Zarejestrowany uzytkownik (z haslem)
-interface RegisteredUser extends User {
-  password: string;
-}
-
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  // Admin login (stary)
-  loginAdmin: (username: string, password: string) => Promise<boolean>;
-  // User login/register (nowy)
   loginUser: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   registerUser: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -30,161 +23,156 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Admin credentials (stare)
-const ADMIN_USERNAME = 'waterlife';
-const ADMIN_PASSWORD = 'admin';
-
-// Storage keys
-const AUTH_SESSION_KEY = 'waterlife_session';
-const USERS_STORAGE_KEY = 'waterlife_users';
-
-// Helper do generowania ID
-function generateId(): string {
-  return Math.random().toString(36).substring(2, 9);
-}
-
-// Helper do pobierania zarejestrowanych userow
-function getRegisteredUsers(): RegisteredUser[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const data = localStorage.getItem(USERS_STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-// Helper do zapisywania userow
-function saveRegisteredUsers(users: RegisteredUser[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => createClient(), []);
 
   const isAdmin = user?.type === 'admin';
 
-  // Check existing session on mount
+  // Check session on mount and listen for auth changes
   useEffect(() => {
-    const session = localStorage.getItem(AUTH_SESSION_KEY);
-    if (session) {
-      try {
-        const data = JSON.parse(session);
-        if (data.id && data.type) {
-          setIsAuthenticated(true);
-          setUser({
-            id: data.id,
-            name: data.name,
-            email: data.email,
-            type: data.type,
-          });
-        }
-      } catch {
-        localStorage.removeItem(AUTH_SESSION_KEY);
-      }
-    }
-    setLoading(false);
-  }, []);
+    let isMounted = true;
+    console.log('🔄 AuthProvider useEffect MOUNT');
 
-  // Admin login (stara logika)
-  const loginAdmin = async (username: string, password: string): Promise<boolean> => {
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      const adminUser: User = {
-        id: 'admin',
-        name: 'Administrator',
-        email: 'admin@waterlife.net.pl',
-        type: 'admin',
-      };
-      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(adminUser));
-      setIsAuthenticated(true);
-      setUser(adminUser);
-      return true;
-    }
-    return false;
-  };
+    // Load user profile from database
+    const loadUserProfile = async (authUser: SupabaseUser) => {
+      console.log('👤 loadUserProfile START:', authUser.email);
+      try {
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        // Don't update state if component unmounted
+        if (!isMounted) {
+          console.log('⚠️ loadUserProfile: component unmounted, skipping state update');
+          return;
+        }
+
+        if (error) {
+          // Ignore AbortError - normal unmount case
+          if (error.message?.includes('AbortError') || (error as any).name === 'AbortError') {
+            console.log('⚠️ loadUserProfile: AbortError, skipping');
+            return;
+          }
+          console.error('Nie udało się załadować profilu:', error.message || error);
+          setLoading(false);
+          return;
+        }
+
+        if (profile) {
+          console.log('✅ loadUserProfile SUCCESS:', profile.full_name, profile.role);
+          setUser({
+            id: authUser.id,
+            name: profile.full_name,
+            email: authUser.email!,
+            type: profile.role,
+          });
+          setIsAuthenticated(true);
+        }
+        setLoading(false);
+      } catch (err: any) {
+        if (!isMounted) return;
+        if (err?.name === 'AbortError') return;
+        console.error('Błąd ładowania profilu:', err);
+        setLoading(false);
+      }
+    };
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('🔍 getSession result:', session?.user?.email || 'NO SESSION');
+      if (!isMounted) {
+        console.log('⚠️ getSession: component unmounted, skipping');
+        return;
+      }
+      if (session?.user) {
+        loadUserProfile(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔑 onAuthStateChange:', event, session?.user?.email || 'NO SESSION');
+      if (!isMounted) {
+        console.log('⚠️ onAuthStateChange: component unmounted, skipping');
+        return;
+      }
+      if (session?.user) {
+        loadUserProfile(session.user);
+      }
+      // Note: Don't reset state on SIGNED_OUT here - let logout() handle it directly
+      // This prevents race conditions where SIGNED_OUT fires unexpectedly
+    });
+
+    return () => {
+      console.log('🔄 AuthProvider useEffect CLEANUP');
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // User login
   const loginUser = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const users = getRegisteredUsers();
-    const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (!foundUser) {
-      return { success: false, error: 'Nie znaleziono konta z tym adresem email' };
+    if (error) {
+      return { success: false, error: error.message };
     }
 
-    if (foundUser.password !== password) {
-      return { success: false, error: 'Nieprawidlowe haslo' };
-    }
-
-    const sessionUser: User = {
-      id: foundUser.id,
-      name: foundUser.name,
-      email: foundUser.email,
-      type: 'user',
-    };
-
-    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionUser));
-    setIsAuthenticated(true);
-    setUser(sessionUser);
-
+    // Profile loaded automatically via onAuthStateChange
     return { success: true };
   };
 
   // User registration
   const registerUser = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const users = getRegisteredUsers();
-
-    // Check if email already exists
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      return { success: false, error: 'Konto z tym adresem email juz istnieje' };
-    }
-
-    const newUser: RegisteredUser = {
-      id: generateId(),
-      name,
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      type: 'user',
-    };
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
+    });
 
-    users.push(newUser);
-    saveRegisteredUsers(users);
+    if (error) {
+      return { success: false, error: error.message };
+    }
 
-    // Auto-login after registration
-    const sessionUser: User = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      type: 'user',
-    };
-
-    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionUser));
-    setIsAuthenticated(true);
-    setUser(sessionUser);
-
+    // Profile loaded automatically via trigger + onAuthStateChange
     return { success: true };
   };
 
-  const logout = () => {
-    localStorage.removeItem(AUTH_SESSION_KEY);
+  const logout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{
-      isAuthenticated,
-      user,
-      isAdmin,
-      loading,
-      loginAdmin,
-      loginUser,
-      registerUser,
-      logout,
-    }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        user,
+        isAdmin,
+        loading,
+        loginUser,
+        registerUser,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

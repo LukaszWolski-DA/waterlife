@@ -20,7 +20,11 @@ import { initializeManufacturersStore, getManufacturerNames } from '@/lib/manufa
  * - Price range (from/to inputs)
  * - Availability (in stock checkbox)
  */
-export default function ProductFilters() {
+interface ProductFiltersProps {
+  onFilterChange?: () => void;
+}
+
+export default function ProductFilters({ onFilterChange }: ProductFiltersProps = {}) {
   const { filters, updateFilter } = useProductFilters();
 
   // Load categories and manufacturers from admin dictionaries
@@ -65,6 +69,7 @@ export default function ProductFilters() {
       ? current.filter(c => c !== category)
       : [...current, category];
     updateFilter('categories', updated);
+    onFilterChange?.();
   };
 
   // Toggle manufacturer selection
@@ -74,6 +79,7 @@ export default function ProductFilters() {
       ? current.filter(m => m !== manufacturer)
       : [...current, manufacturer];
     updateFilter('manufacturers', updated);
+    onFilterChange?.();
   };
 
   // Clear all manufacturers
@@ -204,6 +210,7 @@ export default function ProductFilters() {
               checked={filters.inStock === true}
               onCheckedChange={(checked) => {
                 updateFilter('inStock', checked ? true : null);
+                onFilterChange?.();
               }}
             />
             <Label htmlFor="inStock" className="text-sm font-normal cursor-pointer">

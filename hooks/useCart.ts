@@ -5,10 +5,13 @@ import { persist } from 'zustand/middleware';
 
 /**
  * Custom hook do zarządzania koszykiem zakupowym
- * Używa Zustand do globalnego state management z persystencją w localStorage
+ * Używa localStorage (Zustand persist) dla WSZYSTKICH użytkowników (goście + zalogowani)
+ * 
+ * Zapis do bazy danych (cart_items + orders) następuje tylko przy checkout
+ * (kliknięcie "Wyślij zapytanie ofertowe")
  */
 
-interface CartItem {
+export interface CartItem {
   id: string;
   name: string;
   price: number;
@@ -25,6 +28,13 @@ interface CartStore {
   total: number;
   itemCount: number;
 }
+
+// Helper do kalkulacji total i itemCount
+const calculateTotals = (items: CartItem[]) => {
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  return { total, itemCount };
+};
 
 export const useCart = create<CartStore>()(
   persist(
@@ -50,19 +60,12 @@ export const useCart = create<CartStore>()(
             newItems = [...state.items, { ...item, quantity }];
           }
 
-          const newTotal = newItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
-          const newItemCount = newItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          );
+          const { total, itemCount } = calculateTotals(newItems);
 
           return {
             items: newItems,
-            total: newTotal,
-            itemCount: newItemCount,
+            total,
+            itemCount,
           };
         });
       },
@@ -70,19 +73,12 @@ export const useCart = create<CartStore>()(
       removeItem: (id) => {
         set((state) => {
           const newItems = state.items.filter((item) => item.id !== id);
-          const newTotal = newItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
-          const newItemCount = newItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          );
+          const { total, itemCount } = calculateTotals(newItems);
 
           return {
             items: newItems,
-            total: newTotal,
-            itemCount: newItemCount,
+            total,
+            itemCount,
           };
         });
       },
@@ -97,19 +93,12 @@ export const useCart = create<CartStore>()(
           const newItems = state.items.map((item) =>
             item.id === id ? { ...item, quantity } : item
           );
-          const newTotal = newItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
-          const newItemCount = newItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          );
+          const { total, itemCount } = calculateTotals(newItems);
 
           return {
             items: newItems,
-            total: newTotal,
-            itemCount: newItemCount,
+            total,
+            itemCount,
           };
         });
       },

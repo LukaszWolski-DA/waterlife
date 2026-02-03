@@ -1,0 +1,126 @@
+### WaterLife - Cart API Tests
+### Użyj z rozszerzeniem REST Client w VSCode
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### 1. GET - Pobierz koszyk (wymaga autoryzacji)
+GET {{baseUrl}}/api/cart
+Content-Type: {{contentType}}
+
+###
+
+### 2. POST - Dodaj produkt do koszyka
+POST {{baseUrl}}/api/cart
+Content-Type: {{contentType}}
+
+{
+  "productId": "your-product-uuid-here",
+  "quantity": 2,
+  "price": 299.99,
+  "name": "Test Product",
+  "imageUrl": "https://example.com/image.jpg"
+}
+
+###
+
+### 3. PATCH - Zaktualizuj ilość produktu
+PATCH {{baseUrl}}/api/cart
+Content-Type: {{contentType}}
+
+{
+  "productId": "your-product-uuid-here",
+  "quantity": 5
+}
+
+###
+
+### 4. DELETE - Usuń produkt z koszyka
+DELETE {{baseUrl}}/api/cart
+Content-Type: {{contentType}}
+
+{
+  "productId": "your-product-uuid-here"
+}
+
+###
+
+### 5. PUT - Merge koszyka (synchronizacja po logowaniu)
+PUT {{baseUrl}}/api/cart
+Content-Type: {{contentType}}
+
+{
+  "items": [
+    {
+      "id": "product-uuid-1",
+      "name": "Product 1",
+      "price": 100,
+      "quantity": 2,
+      "imageUrl": "https://example.com/1.jpg"
+    },
+    {
+      "id": "product-uuid-2",
+      "name": "Product 2",
+      "price": 200,
+      "quantity": 1,
+      "imageUrl": "https://example.com/2.jpg"
+    }
+  ]
+}
+
+###
+
+### 6. POST - Wyślij zapytanie ofertowe (Guest)
+POST {{baseUrl}}/api/zapytanie
+Content-Type: {{contentType}}
+
+{
+  "customer": {
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan@example.com",
+    "phone": "+48 123 456 789",
+    "company": "Test Company",
+    "nip": "1234567890",
+    "message": "Proszę o kontakt"
+  },
+  "items": [
+    {
+      "id": "product-uuid-1",
+      "name": "Product 1",
+      "price": 100,
+      "quantity": 2,
+      "imageUrl": "https://example.com/1.jpg"
+    }
+  ],
+  "total": 200,
+  "isGuest": true
+}
+
+###
+
+### 7. POST - Wyślij zapytanie ofertowe (Logged in)
+POST {{baseUrl}}/api/zapytanie
+Content-Type: {{contentType}}
+
+{
+  "customer": {
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan@example.com",
+    "phone": "+48 123 456 789"
+  },
+  "items": [
+    {
+      "id": "product-uuid-1",
+      "name": "Product 1",
+      "price": 100,
+      "quantity": 2
+    }
+  ],
+  "total": 200,
+  "userId": "user-uuid-here",
+  "isGuest": false
+}
+
+###

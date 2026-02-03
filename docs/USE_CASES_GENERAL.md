@@ -5,7 +5,7 @@ Wymagania funkcjonalne ogolne dla aplikacji WaterLife.
 ---
 
 ## Use Case 1: Responsywnosc (Mobile/Tablet)
-**Status: ZAIMPLEMENTOWANE**
+**Status: DO SPRAWDZENIA**
 
 Strona odpowiednio przystosowana do obslugi z telefonu komorkowego (mobile) lub tableta.
 

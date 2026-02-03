@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@/lib/supabase/server';
 
 /**
  * API endpoint dla zapytań ofertowych
- * POST - wysyła zapytanie ofertowe na email
+ * POST - zapisuje zamówienie do bazy (orders + cart_items jako historia) i wysyła zapytanie ofertowe na email
  */
 
 interface CartItem {
@@ -27,12 +28,14 @@ interface RequestBody {
   customer: Customer;
   items: CartItem[];
   total: number;
+  userId?: string;
+  isGuest?: boolean;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: RequestBody = await request.json();
-    const { customer, items, total } = body;
+    const { customer, items, total, userId, isGuest = true } = body;
 
     // Walidacja danych
     if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
@@ -47,6 +50,78 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Koszyk jest pusty' },
         { status: 400 }
       );
+    }
+
+    const supabase = createServerClient();
+
+    // Przygotuj dane zamówienia (dopasowane do struktury tabeli orders)
+    const orderData = {
+      customer_info: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        fullName: `${customer.firstName} ${customer.lastName}`,
+        email: customer.email,
+        phone: customer.phone,
+        company: customer.company || null,
+        nip: customer.nip || null,
+      },
+      total: total,
+      status: 'pending' as const,
+      notes: customer.message || null,
+      user_id: userId || null,
+      is_guest: isGuest,
+      cart_snapshot: {
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl,
+        })),
+        total: total,
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    // Zapisz zamówienie do bazy
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select()
+      .single();
+
+    if (orderError) {
+      console.error('Error saving order:', orderError);
+      throw new Error('Nie udało się zapisać zamówienia');
+    }
+
+    console.log('✅ Order saved to database:', order.id);
+
+    // Zapisz produkty do cart_items jako historia zamówienia
+    // (tylko jeśli użytkownik zalogowany - dla gości pomijamy)
+    if (userId && !isGuest) {
+      try {
+        const cartItemsData = items.map(item => ({
+          user_id: userId,
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+
+        const { error: cartError } = await supabase
+          .from('cart_items')
+          .insert(cartItemsData);
+
+        if (cartError) {
+          console.error('Error saving cart history:', cartError);
+          // Nie przerywaj procesu - zamówienie już jest zapisane
+        } else {
+          console.log('✅ Cart items saved as history:', cartItemsData.length, 'items');
+        }
+      } catch (error) {
+        console.error('Error saving cart items:', error);
+        // Nie przerywaj procesu
+      }
     }
 
     // Formatowanie emaila HTML
@@ -131,18 +206,31 @@ export async function POST(request: NextRequest) {
     //   html: emailHTML,
     // });
 
-    // Na razie logujemy do konsoli
+    // Logowanie do konsoli
     console.log('=== NOWE ZAPYTANIE OFERTOWE ===');
+    console.log('ID zamówienia:', order.id);
     console.log('Klient:', `${customer.firstName} ${customer.lastName}`);
     console.log('Email:', customer.email);
     console.log('Telefon:', customer.phone);
+    console.log('Typ:', isGuest ? 'Gość' : 'Zalogowany');
     console.log('Produkty:', items.length);
     console.log('Wartość:', `${total.toLocaleString('pl-PL')} zł`);
     console.log('================================');
 
+    // TODO: Wysłanie emaila
+    // Tutaj należy zintegrować z serwisem email (np. Resend, SendGrid, Nodemailer)
+    // Przykład z Resend:
+    // await resend.emails.send({
+    //   from: 'WaterLife <noreply@waterlife.net.pl>',
+    //   to: 'biuro@waterlife.net.pl',
+    //   subject: `Nowe zapytanie ofertowe - ${customer.firstName} ${customer.lastName}`,
+    //   html: emailHTML,
+    // });
+
     return NextResponse.json({
       success: true,
       message: 'Zapytanie ofertowe zostało wysłane',
+      orderId: order.id,
     });
   } catch (error) {
     console.error('Błąd podczas wysyłania zapytania:', error);

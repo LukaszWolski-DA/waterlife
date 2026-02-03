@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useProductsAdmin } from '@/hooks/use-products-admin';
@@ -50,8 +50,16 @@ export default function AdminProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
 
-  const categories = getCategories();
+  // Load categories async
+  useEffect(() => {
+    const loadCategories = async () => {
+      const loadedCategories = await getCategories();
+      setCategories(loadedCategories);
+    };
+    loadCategories();
+  }, [getCategories]);
 
   // Filtrowanie produktów
   const filteredProducts = useMemo(() => {
@@ -111,13 +119,11 @@ export default function AdminProductsPage() {
     const badges = {
       active: 'bg-green-100 text-green-800',
       inactive: 'bg-gray-100 text-gray-800',
-      out_of_stock: 'bg-red-100 text-red-800',
     };
 
     const labels = {
       active: 'Aktywny',
       inactive: 'Nieaktywny',
-      out_of_stock: 'Brak w magazynie',
     };
 
     return (

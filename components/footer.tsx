@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Droplets } from "lucide-react";
+import { Droplets, Mail, Phone } from "lucide-react";
 
 const footerLinks = {
   produkty: [
@@ -100,14 +100,26 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-primary-foreground/60">
+          <p className="text-sm text-primary-foreground/60 text-center md:text-left">
             © {new Date().getFullYear()} Waterlife s.c. Wszystkie prawa
             zastrzeżone.
           </p>
-          <div className="flex items-center gap-4 text-sm text-primary-foreground/60">
-            <span>biuro@waterlife.net.pl</span>
-            <span>•</span>
-            <span>tel. 535-430-854</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-primary-foreground/60">
+            <a
+              href="mailto:biuro@waterlife.net.pl"
+              className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
+            >
+              <Mail className="h-3.5 w-3.5 sm:hidden" />
+              biuro@waterlife.net.pl
+            </a>
+            <span className="hidden sm:inline" aria-hidden="true">•</span>
+            <a
+              href="tel:+48535430854"
+              className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
+            >
+              <Phone className="h-3.5 w-3.5 sm:hidden" />
+              tel. 535-430-854
+            </a>
           </div>
         </div>
       </div>

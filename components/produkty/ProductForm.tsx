@@ -62,38 +62,46 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
 
   // Load categories, manufacturers and product data
   useEffect(() => {
-    // Zawsze załaduj kategorie
-    const loadedCategories = getCategories();
-    setCategories(loadedCategories);
+    const loadData = async () => {
+      try {
+        // Załaduj kategorie async
+        const loadedCategories = await getCategories();
+        setCategories(loadedCategories);
 
-    // Zawsze załaduj producentów
-    initializeManufacturersStore();
-    const loadedManufacturers = getManufacturerNames();
-    setManufacturers(loadedManufacturers);
+        // Załaduj producentów (synchroniczne z localStorage)
+        initializeManufacturersStore();
+        const loadedManufacturers = getManufacturerNames();
+        setManufacturers(loadedManufacturers);
 
-    // Jeśli tryb edycji, załaduj dane produktu
-    if (mode === 'edit' && productId) {
-      const product = getProduct(productId);
-      if (product) {
-        // Migracja: jeśli produkt ma tylko imageUrl, przekonwertuj na nowy format
-        let images: ProductImage[] = product.images || [];
-        if (images.length === 0 && product.imageUrl) {
-          images = [{ url: product.imageUrl, isMain: true }];
+        // Jeśli tryb edycji, załaduj dane produktu async
+        if (mode === 'edit' && productId) {
+          const product = await getProduct(productId);
+          if (product) {
+            // Migracja: jeśli produkt ma tylko imageUrl, przekonwertuj na nowy format
+            let images: ProductImage[] = product.images || [];
+            if (images.length === 0 && product.imageUrl) {
+              images = [{ url: product.imageUrl, isMain: true }];
+            }
+
+            setFormData({
+              name: product.name,
+              description: product.description || '',
+              price: product.price,
+              stock: product.stock,
+              category: product.category || '',
+              manufacturer: product.manufacturer || '',
+              imageUrl: product.imageUrl || '',
+              images: images,
+              featured: product.featured || false,
+            });
+          }
         }
-
-        setFormData({
-          name: product.name,
-          description: product.description || '',
-          price: product.price,
-          stock: product.stock,
-          category: product.category || '',
-          manufacturer: product.manufacturer || '',
-          imageUrl: product.imageUrl || '',
-          images: images,
-          featured: product.featured || false,
-        });
+      } catch (error) {
+        console.error('Error loading form data:', error);
       }
-    }
+    };
+
+    loadData();
   }, [mode, productId, getProduct, getCategories]);
 
   const validateForm = (): boolean => {

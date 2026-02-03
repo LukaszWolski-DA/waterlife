@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from 'next-themes'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ClientInit } from '@/components/ClientInit'
 import './globals.css'
 
 const geistSans = Geist({
@@ -82,6 +83,7 @@ export default function RootLayout({
   return (
     <html lang="pl" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        <ClientInit />
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             {children}

@@ -1,63 +1,82 @@
-import type { Product, ProductFormData, ProductImage } from '@/types/product';
-import { getAllProducts as getMockProducts } from './mock-products';
-import { initializeManufacturersStore, getManufacturerNames } from './manufacturers-store';
+import type { Product, ProductFormData, ProductFilter } from '@/types/product';
+import { getAllCategories, getAllManufacturers } from './supabase/metadata';
 
 /**
- * LocalStorage manager dla produktów
- * Używa localStorage jako źródła prawdy dla CRUD operations
+ * Products API client
+ * Używa /api/produkty które komunikuje się z Supabase
+ *
+ * UWAGA: To już nie jest localStorage store!
+ * Wszystkie operacje przechodzą przez API → Supabase
  */
-
-const STORAGE_KEY = 'waterlife_products';
 
 /**
- * Inicjalizuje store z mock products jeśli jest pusty
+ * Pobiera wszystkie produkty z API
  */
-export function initializeStore(): void {
-  if (typeof window === 'undefined') return;
-
+export async function getAllProducts(): Promise<Product[]> {
   try {
-    const existing = localStorage.getItem(STORAGE_KEY);
+    const response = await fetch('/api/produkty');
+    const result = await response.json();
 
-    if (!existing) {
-      const mockProducts = getMockProducts();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mockProducts));
-      console.log('📦 Initialized products store with', mockProducts.length, 'mock products');
+    if (!result.success) {
+      console.error('Error fetching products:', result.error);
+      return [];
     }
+
+    return result.data || [];
   } catch (error) {
-    console.error('Error initializing products store:', error);
+    console.error('Error fetching products:', error);
+    return [];
   }
 }
 
 /**
- * Pobiera wszystkie produkty z localStorage
+ * Pobiera produkty z filtrami
  */
-export function getAllProducts(): Product[] {
-  if (typeof window === 'undefined') return [];
-
+export async function getFilteredProducts(filters: ProductFilter): Promise<Product[]> {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const params = new URLSearchParams();
 
-    if (!data) {
-      initializeStore();
-      const newData = localStorage.getItem(STORAGE_KEY);
-      return newData ? JSON.parse(newData) : [];
+    if (filters.categories && filters.categories.length > 0) {
+      params.append('categories', filters.categories.join(','));
+    }
+    if (filters.manufacturers && filters.manufacturers.length > 0) {
+      params.append('manufacturers', filters.manufacturers.join(','));
+    }
+    if (filters.minPrice !== undefined) {
+      params.append('minPrice', filters.minPrice.toString());
+    }
+    if (filters.maxPrice !== undefined) {
+      params.append('maxPrice', filters.maxPrice.toString());
+    }
+    if (filters.inStock) {
+      params.append('inStock', 'true');
+    }
+    if (filters.search) {
+      params.append('search', filters.search);
     }
 
-    return JSON.parse(data);
+    const response = await fetch(`/api/produkty?${params.toString()}`);
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error('Error filtering products:', result.error);
+      return [];
+    }
+
+    return result.data || [];
   } catch (error) {
-    console.error('Error getting products:', error);
+    console.error('Error filtering products:', error);
     return [];
   }
 }
 
 /**
  * Pobiera produkt po ID
+ * Uwaga: Używa getAllProducts i filtruje - można zoptymalizować później
  */
-export function getProductById(id: string): Product | null {
-  if (typeof window === 'undefined') return null;
-
+export async function getProductById(id: string): Promise<Product | null> {
   try {
-    const products = getAllProducts();
+    const products = await getAllProducts();
     return products.find(p => p.id === id) || null;
   } catch (error) {
     console.error('Error getting product by ID:', error);
@@ -66,54 +85,26 @@ export function getProductById(id: string): Product | null {
 }
 
 /**
- * Tworzy nowy produkt
+ * Tworzy nowy produkt (ADMIN)
  */
-export function createProduct(data: ProductFormData): Product {
-  if (typeof window === 'undefined') {
-    throw new Error('Cannot create product on server side');
-  }
-
+export async function createProduct(data: ProductFormData): Promise<Product> {
   try {
-    const products = getAllProducts();
+    const response = await fetch('/api/produkty', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-    // Generate unique ID
-    const id = Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+    const result = await response.json();
 
-    // Obsługa nowej struktury images z kompatybilnością wsteczną
-    let images: ProductImage[] = data.images || [];
-    let mainImageUrl = '';
-
-    if (images.length > 0) {
-      // Nowa struktura - znajdź główne zdjęcie
-      const mainImage = images.find(img => img.isMain);
-      mainImageUrl = mainImage?.url || images[0]?.url || '';
-    } else if (data.imageUrl) {
-      // Legacy - konwertuj pojedyncze imageUrl na nowy format
-      images = [{ url: data.imageUrl, isMain: true }];
-      mainImageUrl = data.imageUrl;
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create product');
     }
 
-    const newProduct: Product = {
-      id,
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      stock: data.stock,
-      category: data.category,
-      manufacturer: data.manufacturer,
-      imageUrl: mainImageUrl,
-      images: images,
-      featured: false,
-      status: data.stock > 0 ? 'active' : 'out_of_stock',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    products.push(newProduct);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-
-    console.log('✅ Created product:', newProduct.name);
-    return newProduct;
+    console.log('✅ Created product:', result.data.name);
+    return result.data;
   } catch (error) {
     console.error('Error creating product:', error);
     throw error;
@@ -121,55 +112,30 @@ export function createProduct(data: ProductFormData): Product {
 }
 
 /**
- * Aktualizuje istniejący produkt
+ * Aktualizuje istniejący produkt (ADMIN)
  */
-export function updateProduct(id: string, data: Partial<ProductFormData>): Product | null {
-  if (typeof window === 'undefined') {
-    throw new Error('Cannot update product on server side');
-  }
-
+export async function updateProduct(
+  id: string,
+  data: Partial<ProductFormData>
+): Promise<Product | null> {
   try {
-    const products = getAllProducts();
-    const index = products.findIndex(p => p.id === id);
+    const response = await fetch('/api/produkty', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id, ...data }),
+    });
 
-    if (index === -1) {
-      console.error('Product not found:', id);
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error('Error updating product:', result.error);
       return null;
     }
 
-    // Obsługa aktualizacji images z kompatybilnością wsteczną
-    let newImages: ProductImage[] | undefined = products[index].images;
-    let newImageUrl: string | undefined = products[index].imageUrl;
-
-    if (data.images !== undefined) {
-      // Nowa struktura images
-      newImages = data.images;
-      const mainImage = data.images.find(img => img.isMain);
-      newImageUrl = mainImage?.url || data.images[0]?.url || '';
-    } else if (data.imageUrl !== undefined) {
-      // Legacy - pojedyncze imageUrl
-      newImageUrl = data.imageUrl;
-      newImages = data.imageUrl ? [{ url: data.imageUrl, isMain: true }] : [];
-    }
-
-    const updatedProduct: Product = {
-      ...products[index],
-      ...data,
-      imageUrl: newImageUrl,
-      images: newImages,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update status based on stock
-    if (data.stock !== undefined) {
-      updatedProduct.status = data.stock > 0 ? 'active' : 'out_of_stock';
-    }
-
-    products[index] = updatedProduct;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-
-    console.log('✅ Updated product:', updatedProduct.name);
-    return updatedProduct;
+    console.log('✅ Updated product:', result.data.name);
+    return result.data;
   } catch (error) {
     console.error('Error updating product:', error);
     throw error;
@@ -177,74 +143,56 @@ export function updateProduct(id: string, data: Partial<ProductFormData>): Produ
 }
 
 /**
- * Usuwa produkt
+ * Usuwa produkt (ADMIN)
  */
-export function deleteProduct(id: string): boolean {
-  if (typeof window === 'undefined') {
-    throw new Error('Cannot delete product on server side');
-  }
-
+export async function deleteProduct(id: string): Promise<boolean> {
   try {
-    const products = getAllProducts();
-    const filtered = products.filter(p => p.id !== id);
+    const response = await fetch(`/api/produkty?id=${id}`, {
+      method: 'DELETE',
+    });
 
-    if (filtered.length === products.length) {
-      console.error('Product not found:', id);
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error('Error deleting product:', result.error);
       return false;
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     console.log('🗑️ Deleted product:', id);
     return true;
   } catch (error) {
     console.error('Error deleting product:', error);
-    throw error;
+    return false;
   }
 }
 
 /**
- * Pobiera kategorie z categories-store
+ * Pobiera kategorie z API (Supabase)
+ * TODO: Utworzyć dedykowany endpoint /api/categories
  */
-export function getCategories(): string[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    // Import dynamically to avoid circular dependency
-    const { initializeCategoriesStore, getCategoryNames } = require('./categories-store');
-    initializeCategoriesStore(); // Inicjalizuj store przed odczytem
-    return getCategoryNames();
-  } catch (error) {
-    console.error('Error getting categories:', error);
-    return [];
-  }
+export async function getCategories(): Promise<string[]> {
+  return await getAllCategories();
 }
 
 /**
- * Pobiera producentów z manufacturers-store
+ * Pobiera producentów z API (Supabase)
  */
-export function getManufacturers(): string[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    initializeManufacturersStore();
-    return getManufacturerNames();
-  } catch (error) {
-    console.error('Error getting manufacturers:', error);
-    return [];
-  }
+export async function getManufacturers(): Promise<string[]> {
+  return await getAllManufacturers();
 }
 
 /**
- * Resetuje store do mock products
+ * DEPRECATED: initializeStore() - nie jest już potrzebne
+ * Dane są teraz w Supabase, nie localStorage
+ */
+export function initializeStore(): void {
+  console.warn('⚠️ initializeStore() is deprecated - data is now in Supabase');
+}
+
+/**
+ * DEPRECATED: resetStore() - nie jest już potrzebne
+ * Dane są teraz w Supabase, nie localStorage
  */
 export function resetStore(): void {
-  if (typeof window === 'undefined') return;
-
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    initializeStore();
-    console.log('🔄 Reset products store to mock data');
-  } catch (error) {
-    console.error('Error resetting store:', error);
-  }
+  console.warn('⚠️ resetStore() is deprecated - data is now in Supabase');
 }

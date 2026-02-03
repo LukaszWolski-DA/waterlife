@@ -28,7 +28,7 @@ export interface Product {
   imageUrl?: string;      // Legacy - zachowane dla kompatybilności
   images?: ProductImage[]; // Nowa struktura z wieloma zdjęciami
   featured?: boolean; // Czy produkt jest wyróżniony
-  status: 'active' | 'inactive' | 'out_of_stock';
+  status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
 }

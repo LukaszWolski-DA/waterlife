@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { Product, ProductFilter } from '@/types/product';
-import { getAllProducts, getProductById, initializeStore } from '@/lib/products-store';
+import { getAllProducts, getProductById, getFilteredProducts } from '@/lib/products-store';
 
 /**
- * Custom hook do pobierania produktów z localStorage
+ * Custom hook do pobierania produktów z API (Supabase)
  * Obsługuje pobieranie, filtrowanie i zarządzanie stanem produktów
  */
 
@@ -23,16 +23,25 @@ interface UseProductsReturn {
 
 export function useProducts(options: UseProductsOptions = {}): UseProductsReturn {
   const { filters, autoFetch = true } = options;
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchProducts = () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
-      initializeStore();
-      const products = getAllProducts();
-      setAllProducts(products);
+
+      // Jeśli są filtry, użyj getFilteredProducts
+      // W przeciwnym razie pobierz wszystkie
+      let fetchedProducts: Product[];
+
+      if (filters && Object.keys(filters).length > 0) {
+        fetchedProducts = await getFilteredProducts(filters);
+      } else {
+        fetchedProducts = await getAllProducts();
+      }
+
+      setProducts(fetchedProducts);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Nieznany błąd'));
@@ -46,53 +55,10 @@ export function useProducts(options: UseProductsOptions = {}): UseProductsReturn
     if (autoFetch) {
       fetchProducts();
     }
-  }, [autoFetch]);
-
-  // Filter products based on filters
-  const filteredProducts = useMemo(() => {
-    let products = allProducts;
-
-    // Filter by multiple categories (OR logic)
-    if (filters?.categories && filters.categories.length > 0) {
-      products = products.filter(p =>
-        p.category && filters.categories!.includes(p.category)
-      );
-    }
-
-    // Filter by multiple manufacturers (OR logic)
-    if (filters?.manufacturers && filters.manufacturers.length > 0) {
-      products = products.filter(p =>
-        p.manufacturer && filters.manufacturers!.includes(p.manufacturer)
-      );
-    }
-
-    // Filter by price range
-    if (filters?.minPrice !== undefined) {
-      products = products.filter(p => p.price >= filters.minPrice!);
-    }
-    if (filters?.maxPrice !== undefined) {
-      products = products.filter(p => p.price <= filters.maxPrice!);
-    }
-
-    // Filter by stock availability
-    if (filters?.inStock) {
-      products = products.filter(p => p.stock > 0);
-    }
-
-    // Filter by search query
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase();
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        (p.description && p.description.toLowerCase().includes(searchLower))
-      );
-    }
-
-    return products;
-  }, [allProducts, filters]);
+  }, [autoFetch, JSON.stringify(filters)]); // Re-fetch when filters change
 
   return {
-    products: filteredProducts,
+    products,
     loading,
     error,
     refetch: fetchProducts,
@@ -108,18 +74,21 @@ export function useProduct(id: string) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    try {
-      setLoading(true);
-      initializeStore();
-      const foundProduct = getProductById(id);
-      setProduct(foundProduct);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Nieznany błąd'));
-      console.error('Błąd podczas pobierania produktu:', err);
-    } finally {
-      setLoading(false);
-    }
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const foundProduct = await getProductById(id);
+        setProduct(foundProduct);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Nieznany błąd'));
+        console.error('Błąd podczas pobierania produktu:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
   return {

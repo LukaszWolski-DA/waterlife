@@ -28,7 +28,7 @@ export function CategoriesSection() {
     return null;
   }
   return (
-    <>
+    <div suppressHydrationWarning>
       {/* Intro section */}
       <section className="py-20 md:py-28 bg-background" id="categories">
         <div className="container mx-auto px-4">
@@ -103,6 +103,6 @@ export function CategoriesSection() {
           </section>
         );
       })}
-    </>
+    </div>
   );
 }

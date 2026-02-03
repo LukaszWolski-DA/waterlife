@@ -23,14 +23,23 @@ export default function EditProductPage() {
   const productId = params.id as string;
 
   useEffect(() => {
-    setLoading(true);
-    const product = getProduct(productId);
+    const loadProduct = async () => {
+      setLoading(true);
+      try {
+        const product = await getProduct(productId);
 
-    if (!product) {
-      setNotFound(true);
-    }
+        if (!product) {
+          setNotFound(true);
+        }
+      } catch (error) {
+        console.error('Error loading product:', error);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setLoading(false);
+    loadProduct();
   }, [productId, getProduct]);
 
   if (loading) {

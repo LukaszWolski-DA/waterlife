@@ -33,23 +33,26 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    initializeStore();
-    const foundProduct = getProductById(id);
+    const loadProduct = async () => {
+      const foundProduct = await getProductById(id);
 
-    if (!foundProduct) {
+      if (!foundProduct) {
+        setLoading(false);
+        return;
+      }
+
+      setProduct(foundProduct);
+
+      // Get related products (same category)
+      const allProducts = await getAllProducts();
+      const related = allProducts
+        .filter(p => p.category === foundProduct.category && p.id !== id)
+        .slice(0, 4);
+      setRelatedProducts(related);
       setLoading(false);
-      return;
-    }
+    };
 
-    setProduct(foundProduct);
-
-    // Get related products (same category)
-    const allProducts = getAllProducts();
-    const related = allProducts
-      .filter(p => p.category === foundProduct.category && p.id !== id)
-      .slice(0, 4);
-    setRelatedProducts(related);
-    setLoading(false);
+    loadProduct();
   }, [id]);
 
   if (loading) {

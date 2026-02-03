@@ -34,16 +34,19 @@ export function ProductsSection() {
   const { addItem } = useCart();
   const { toast } = useToast();
 
-  // Load products from localStorage
+  // Load products from API (Supabase)
   useEffect(() => {
-    initializeStore();
-    const allProducts = getAllProducts();
-    // Get only bestsellers (featured === true), sorted by price descending, max 6
-    const featuredProducts = allProducts
-      .filter(p => p.featured === true && p.status === 'active')
-      .sort((a, b) => b.price - a.price)
-      .slice(0, 6);
-    setProducts(featuredProducts);
+    const loadProducts = async () => {
+      const allProducts = await getAllProducts();
+      // Get only bestsellers (featured === true), sorted by price descending, max 6
+      const featuredProducts = allProducts
+        .filter(p => p.featured === true && p.status === 'active')
+        .sort((a, b) => b.price - a.price)
+        .slice(0, 6);
+      setProducts(featuredProducts);
+    };
+
+    loadProducts();
   }, []);
 
   const handleAddToCart = (product: Product) => {
@@ -62,7 +65,7 @@ export function ProductsSection() {
   };
 
   return (
-    <section className="py-20 md:py-28 bg-secondary/50" id="products">
+    <section className="py-20 md:py-28 bg-secondary/50" id="products" suppressHydrationWarning>
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>

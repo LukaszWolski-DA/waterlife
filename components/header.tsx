@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Droplets,
   Menu,
@@ -143,7 +143,10 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px]">
-                <div className="flex flex-col gap-4 mt-8">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-6">
                   {/* Ukryj wyszukiwarke na stronie /produkty - ma dedykowana */}
                   {pathname !== '/produkty' && (
                     <HeaderSearchBar onSearch={() => setIsOpen(false)} />

@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllProducts, getProductsByCategory } from '@/lib/mock-products';
+import {
+  getAllProductsServer,
+  getFilteredProductsServer,
+  createProductServer,
+  updateProductServer,
+  deleteProductServer,
+} from '@/lib/supabase/products';
+import type { ProductFormData } from '@/types/product';
 
 /**
  * API endpoint dla produktów
@@ -7,44 +14,45 @@ import { getAllProducts, getProductsByCategory } from '@/lib/mock-products';
  * POST - utwórz nowy produkt (tylko admin)
  */
 
-// GET /api/produkty - Pobierz listę produktów
+// GET /api/produkty - Pobierz listę produktów z Supabase
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
+
+    // Parse query parameters
+    const categoriesParam = searchParams.get('categories');
+    const manufacturersParam = searchParams.get('manufacturers');
     const minPriceStr = searchParams.get('minPrice');
     const maxPriceStr = searchParams.get('maxPrice');
     const inStockStr = searchParams.get('inStock');
     const search = searchParams.get('search');
 
-    // Pobierz produkty (z mock data)
-    let products = category
-      ? getProductsByCategory(category)
-      : getAllProducts();
+    // Sprawdź czy są jakiekolwiek filtry
+    const hasFilters =
+      categoriesParam ||
+      manufacturersParam ||
+      minPriceStr ||
+      maxPriceStr ||
+      inStockStr ||
+      search;
 
-    // Filtruj po cenie
-    if (minPriceStr) {
-      const minPrice = parseFloat(minPriceStr);
-      products = products.filter(p => p.price >= minPrice);
-    }
+    let products;
 
-    if (maxPriceStr) {
-      const maxPrice = parseFloat(maxPriceStr);
-      products = products.filter(p => p.price <= maxPrice);
-    }
+    if (hasFilters) {
+      // Użyj filtrowanego zapytania
+      const filters = {
+        categories: categoriesParam ? categoriesParam.split(',') : undefined,
+        manufacturers: manufacturersParam ? manufacturersParam.split(',') : undefined,
+        minPrice: minPriceStr ? parseFloat(minPriceStr) : undefined,
+        maxPrice: maxPriceStr ? parseFloat(maxPriceStr) : undefined,
+        inStock: inStockStr === 'true' ? true : undefined,
+        search: search || undefined,
+      };
 
-    // Filtruj po dostępności
-    if (inStockStr === 'true') {
-      products = products.filter(p => p.stock > 0);
-    }
-
-    // Filtruj po wyszukiwanej frazie
-    if (search) {
-      const searchLower = search.toLowerCase();
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description?.toLowerCase().includes(searchLower)
-      );
+      products = await getFilteredProductsServer(filters);
+    } else {
+      // Pobierz wszystkie produkty
+      products = await getAllProductsServer();
     }
 
     return NextResponse.json({
@@ -60,25 +68,47 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/produkty - Utwórz nowy produkt
+// POST /api/produkty - Utwórz nowy produkt (ADMIN)
 export async function POST(request: NextRequest) {
   try {
+    // TODO: Sprawdzenie autoryzacji admina
+    // W przyszłości: const session = await getServerSession();
+    // if (!session || !session.user.isAdmin) return 401
+
     const body = await request.json();
 
-    // TODO: Walidacja danych z Zod
-    // TODO: Sprawdzenie autoryzacji admina
-    // TODO: Zapisanie produktu do Supabase
+    // Podstawowa walidacja
+    if (!body.name || !body.price || body.stock === undefined) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Brak wymaganych pól: name, price, stock',
+        },
+        { status: 400 }
+      );
+    }
 
-    const newProduct = {
-      id: 'temp-id',
-      ...body,
-      createdAt: new Date().toISOString(),
+    // Utwórz produkt w Supabase
+    const productData: ProductFormData = {
+      name: body.name,
+      description: body.description,
+      price: body.price,
+      stock: body.stock,
+      category: body.category,
+      manufacturer: body.manufacturer,
+      images: body.images || [],
+      featured: body.featured || false,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: newProduct,
-    }, { status: 201 });
+    const newProduct = await createProductServer(productData);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: newProduct,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Błąd podczas tworzenia produktu:', error);
     return NextResponse.json(
@@ -88,19 +118,34 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/produkty - Zaktualizuj produkt
+// PUT /api/produkty - Zaktualizuj produkt (ADMIN)
 export async function PUT(request: NextRequest) {
   try {
+    // TODO: Sprawdzenie autoryzacji admina
+
     const body = await request.json();
     const { id, ...updateData } = body;
 
-    // TODO: Walidacja danych
-    // TODO: Sprawdzenie autoryzacji admina
-    // TODO: Aktualizacja produktu w Supabase
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Brak ID produktu' },
+        { status: 400 }
+      );
+    }
+
+    // Aktualizuj produkt w Supabase
+    const updatedProduct = await updateProductServer(id, updateData);
+
+    if (!updatedProduct) {
+      return NextResponse.json(
+        { success: false, error: 'Produkt nie został znaleziony' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      data: { id, ...updateData },
+      data: updatedProduct,
     });
   } catch (error) {
     console.error('Błąd podczas aktualizacji produktu:', error);
@@ -111,9 +156,11 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE /api/produkty - Usuń produkt
+// DELETE /api/produkty - Usuń produkt (ADMIN)
 export async function DELETE(request: NextRequest) {
   try {
+    // TODO: Sprawdzenie autoryzacji admina
+
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
 
@@ -124,8 +171,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // TODO: Sprawdzenie autoryzacji admina
-    // TODO: Usunięcie produktu z Supabase
+    // Usuń produkt z Supabase
+    await deleteProductServer(id);
 
     return NextResponse.json({
       success: true,
