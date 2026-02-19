@@ -3,17 +3,21 @@ import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { CategoryFormData } from '@/types/category';
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 /**
  * GET /api/admin/categories/[id]
  * Pobiera pojedynczą kategorię po ID
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     const supabase = await createAuthServerClient();
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Auth check
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -70,11 +74,11 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     const supabase = await createAuthServerClient();
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Auth check
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -166,11 +170,11 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     const supabase = await createAuthServerClient();
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Auth check
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();

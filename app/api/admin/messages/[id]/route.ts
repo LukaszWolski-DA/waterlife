@@ -3,13 +3,17 @@ import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { ContactMessageUpdate } from '@/types/contact';
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 /**
  * GET /api/admin/messages/[id] - pobiera pojedynczą wiadomość
  * Wymaga autoryzacji admin
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -17,14 +21,20 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Fetch message
     const { data: message, error } = await supabase
@@ -56,7 +66,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -64,14 +74,20 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
     const body = await request.json() as ContactMessageUpdate;
 
     // Validation
@@ -139,7 +155,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -147,14 +163,20 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Delete message
     const { error } = await supabase
