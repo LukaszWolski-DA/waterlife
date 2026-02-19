@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProductsAdmin } from '@/hooks/use-products-admin';
-import { initializeManufacturersStore, getManufacturerNames, manufacturerNameExists } from '@/lib/manufacturers-store';
+import { getAllManufacturers } from '@/lib/supabase/metadata';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,9 +68,8 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         const loadedCategories = await getCategories();
         setCategories(loadedCategories);
 
-        // Załaduj producentów (synchroniczne z localStorage)
-        initializeManufacturersStore();
-        const loadedManufacturers = getManufacturerNames();
+        // Załaduj producentów z Supabase
+        const loadedManufacturers = await getAllManufacturers();
         setManufacturers(loadedManufacturers);
 
         // Jeśli tryb edycji, załaduj dane produktu async
@@ -207,12 +206,14 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     const newManufacturer = e.target.value;
     setCustomManufacturer(newManufacturer);
 
-    // Check for duplicates in real-time
+    // Check for duplicates in real-time (comparing with loaded manufacturers list)
     if (newManufacturer.trim().length >= 2) {
-      const exists = manufacturerNameExists(newManufacturer);
+      const normalizedNew = newManufacturer.trim().toLowerCase();
+      const exists = manufacturers.some(m => m.toLowerCase() === normalizedNew);
+      
       if (exists) {
         const existing = manufacturers.find(
-          m => m.toLowerCase() === newManufacturer.trim().toLowerCase()
+          m => m.toLowerCase() === normalizedNew
         );
         setManufacturerDuplicateWarning(
           `Producent "${existing}" już istnieje w systemie. Wybierz go z listy powyżej.`

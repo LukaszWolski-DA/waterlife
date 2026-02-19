@@ -1,0 +1,21 @@
+Use Case 1:
+Obecnie po kliknięciu ikonki użytkownika na http://localhost:3000/ pojawiąją mi się dwie opcje na liście:
+- Zaloguj
+- Załóż konto
+Po kliknięciu "Zaloguj" widzę modal z dwiema zakładkami - Logowanie oraz Rejestracja.
+
+Co chcę zrobić - jak kliknę "Zaloguj" - powinienem widzieć modeal z kartą "Logowanie" - tak teraz jest.
+Jak kliknę "Załóż konto" - powinienem widzieć modal z kartą "Rejestracja".
+
+Use Case 2:
+Odzyskiwanie hasła. Zastanawiam się gdzie umieścić formularz odzyskiwania hasła?
+
+Use Case 3:
+Jestem już zalogowany. Na liście uzytkownika mam tylko jedną opcję - Wyloguj się.
+Zastanawiam się czy to wystarczy czy powinienem dodać jeszcze opcję "Edytuj profil" lub "Moje zamówienia".
+To są dwie podstawowe funkcje, które chciałbym zaimplementować.
+
+Use Case 4:
+Po zalogowaniu się widzę opcje Moja zamówienia oraz Wyloguj się.
+Chciałby dodać jeszcze jedną opcję - Edytuj profil.
+Będę mógł tam zmienić swoje dane osobowe lub firmowe - nazwę firmy, adres, telefony, email.

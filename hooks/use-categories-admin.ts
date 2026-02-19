@@ -6,23 +6,25 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  initializeCategoriesStore,
 } from '@/lib/categories-store';
 
+/**
+ * Hook for managing categories in admin panel
+ * Updated to work with asynchronous API calls
+ */
 export function useCategoriesAdmin() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadCategories = useCallback(() => {
+  const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
-      initializeCategoriesStore();
-      const data = getAllCategories();
+      const data = await getAllCategories();
       setCategories(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load categories');
+      setError('Nie udało się załadować kategorii');
       console.error(err);
     } finally {
       setLoading(false);
@@ -33,17 +35,17 @@ export function useCategoriesAdmin() {
     loadCategories();
   }, [loadCategories]);
 
-  const getCategory = useCallback((id: string) => {
-    return getCategoryById(id);
+  const getCategory = useCallback(async (id: string) => {
+    return await getCategoryById(id);
   }, []);
 
   const addCategory = useCallback(async (data: CategoryFormData) => {
     try {
-      const newCategory = createCategory(data);
+      const newCategory = await createCategory(data);
       setCategories(prev => [...prev, newCategory]);
       return newCategory;
     } catch (err) {
-      setError('Failed to create category');
+      setError('Nie udało się utworzyć kategorii');
       console.error(err);
       throw err;
     }
@@ -51,16 +53,16 @@ export function useCategoriesAdmin() {
 
   const editCategory = useCallback(async (id: string, data: Partial<CategoryFormData>) => {
     try {
-      const updated = updateCategory(id, data);
+      const updated = await updateCategory(id, data);
       if (updated) {
         setCategories(prev =>
           prev.map(cat => (cat.id === id ? updated : cat))
         );
         return updated;
       }
-      throw new Error('Category not found');
+      throw new Error('Kategoria nie znaleziona');
     } catch (err) {
-      setError('Failed to update category');
+      setError('Nie udało się zaktualizować kategorii');
       console.error(err);
       throw err;
     }
@@ -68,13 +70,13 @@ export function useCategoriesAdmin() {
 
   const removeCategory = useCallback(async (id: string) => {
     try {
-      const success = deleteCategory(id);
+      const success = await deleteCategory(id);
       if (success) {
         setCategories(prev => prev.filter(cat => cat.id !== id));
       }
       return success;
     } catch (err) {
-      setError('Failed to delete category');
+      setError('Nie udało się usunąć kategorii');
       console.error(err);
       return false;
     }

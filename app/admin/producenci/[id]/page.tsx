@@ -40,32 +40,47 @@ export default function EditManufacturerPage({ params }: EditManufacturerPagePro
   useEffect(() => {
     if (!manufacturerId) return;
 
-    const manufacturer = getManufacturer(manufacturerId);
-    if (!manufacturer) {
-      setNotFound(true);
-      setLoading(false);
-      return;
+    async function loadManufacturer() {
+      try {
+        const manufacturer = await getManufacturer(manufacturerId);
+        if (!manufacturer) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+
+        setFormData({
+          name: manufacturer.name,
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading manufacturer:', error);
+        setNotFound(true);
+        setLoading(false);
+      }
     }
 
-    setFormData({
-      name: manufacturer.name,
-    });
-    setLoading(false);
+    loadManufacturer();
   }, [manufacturerId, getManufacturer]);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setFormData({ name: newName });
 
     // Check for duplicates (excluding current manufacturer)
     if (newName.trim().length >= 2) {
-      const exists = checkNameExists(newName, manufacturerId);
-      if (exists) {
-        const existing = findByName(newName);
-        setDuplicateWarning(
-          `Producent "${existing?.name}" już istnieje w systemie.`
-        );
-      } else {
+      try {
+        const exists = await checkNameExists(newName, manufacturerId);
+        if (exists) {
+          const existing = await findByName(newName);
+          setDuplicateWarning(
+            `Producent "${existing?.name}" już istnieje w systemie.`
+          );
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch (error) {
+        console.error('Error checking duplicate:', error);
         setDuplicateWarning(null);
       }
     } else {

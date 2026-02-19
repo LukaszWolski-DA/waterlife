@@ -29,19 +29,24 @@ export default function AddManufacturerPage() {
   const [saving, setSaving] = useState(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setFormData({ name: newName });
 
     // Check for duplicates in real-time
     if (newName.trim().length >= 2) {
-      const exists = checkNameExists(newName);
-      if (exists) {
-        const existing = findByName(newName);
-        setDuplicateWarning(
-          `Producent "${existing?.name}" już istnieje w systemie. Czy chciałeś wybrać istniejącego producenta?`
-        );
-      } else {
+      try {
+        const exists = await checkNameExists(newName);
+        if (exists) {
+          const existing = await findByName(newName);
+          setDuplicateWarning(
+            `Producent "${existing?.name}" już istnieje w systemie. Czy chciałeś wybrać istniejącego producenta?`
+          );
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch (error) {
+        console.error('Error checking duplicate:', error);
         setDuplicateWarning(null);
       }
     } else {

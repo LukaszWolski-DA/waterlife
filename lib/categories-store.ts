@@ -1,158 +1,159 @@
 import type { Category, CategoryFormData } from '@/types/category';
 
-const STORAGE_KEY = 'waterlife_categories';
-
-// Początkowe kategorie (mock data)
-const INITIAL_CATEGORIES: Category[] = [
-  {
-    id: '1',
-    name: 'Technika Grzewcza',
-    description: 'Kotły gazowe, kondensacyjne, piece CO i akcesoria grzewcze',
-    keywords: ['kotły', 'grzewcze', 'piece', 'ogrzewanie', 'kondensacyjne'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Systemy Sanitarne',
-    description: 'Podgrzewacze wody, bojlery, pompy i instalacje sanitarne',
-    keywords: ['podgrzewacze', 'bojlery', 'woda', 'sanitarne', 'pompy'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Nawadnianie',
-    description: 'Systemy nawadniania ogrodów, trawników i terenów zielonych',
-    keywords: ['nawadnianie', 'ogród', 'trawnik', 'zraszacze', 'systemy'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+/**
+ * Categories Store - API version (migrated from localStorage to Supabase)
+ * All functions are now asynchronous and interact with /api/admin/categories
+ */
 
 /**
- * Initialize categories store with mock data if empty
+ * Get all categories from API
  */
-export function initializeCategoriesStore(): void {
-  if (typeof window === 'undefined') return;
-
+export async function getAllCategories(): Promise<Category[]> {
   try {
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (!existing) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_CATEGORIES));
-    }
-  } catch (error) {
-    console.error('Error initializing categories store:', error);
-  }
-}
+    const response = await fetch('/api/admin/categories', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
 
-/**
- * Get all categories from localStorage
- */
-export function getAllCategories(): Category[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-      initializeCategoriesStore();
-      return INITIAL_CATEGORIES;
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error fetching categories:', error);
+      throw new Error(error.error || 'Nie udało się pobrać kategorii');
     }
-    return JSON.parse(data) as Category[];
+
+    const { categories } = await response.json();
+    return categories;
   } catch (error) {
     console.error('Error getting categories:', error);
-    return [];
+    throw error;
   }
 }
 
 /**
- * Get category by ID
+ * Get category by ID from API
  */
-export function getCategoryById(id: string): Category | null {
-  const categories = getAllCategories();
-  return categories.find(cat => cat.id === id) || null;
+export async function getCategoryById(id: string): Promise<Category | null> {
+  try {
+    const response = await fetch(`/api/admin/categories/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      const error = await response.json();
+      console.error('Error fetching category:', error);
+      throw new Error(error.error || 'Nie udało się pobrać kategorii');
+    }
+
+    const { category } = await response.json();
+    return category;
+  } catch (error) {
+    console.error('Error getting category:', error);
+    throw error;
+  }
 }
 
 /**
- * Create a new category
+ * Create a new category via API
  */
-export function createCategory(data: CategoryFormData): Category {
-  const categories = getAllCategories();
-
-  const newCategory: Category = {
-    ...data,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  categories.push(newCategory);
-
+export async function createCategory(data: CategoryFormData): Promise<Category> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
+    const response = await fetch('/api/admin/categories', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error creating category:', error);
+      throw new Error(error.error || 'Nie udało się utworzyć kategorii');
+    }
+
+    const { category } = await response.json();
+    return category;
   } catch (error) {
     console.error('Error creating category:', error);
-    throw new Error('Failed to create category');
+    throw error;
   }
-
-  return newCategory;
 }
 
 /**
- * Update an existing category
+ * Update an existing category via API
  */
-export function updateCategory(id: string, data: Partial<CategoryFormData>): Category | null {
-  const categories = getAllCategories();
-  const index = categories.findIndex(cat => cat.id === id);
-
-  if (index === -1) {
-    console.error('Category not found:', id);
-    return null;
-  }
-
-  const updated: Category = {
-    ...categories[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-
-  categories[index] = updated;
-
+export async function updateCategory(id: string, data: Partial<CategoryFormData>): Promise<Category> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
+    const response = await fetch(`/api/admin/categories/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error updating category:', error);
+      throw new Error(error.error || 'Nie udało się zaktualizować kategorii');
+    }
+
+    const { category } = await response.json();
+    return category;
   } catch (error) {
     console.error('Error updating category:', error);
-    throw new Error('Failed to update category');
+    throw error;
   }
-
-  return updated;
 }
 
 /**
- * Delete a category
+ * Delete a category via API
  */
-export function deleteCategory(id: string): boolean {
-  const categories = getAllCategories();
-  const filtered = categories.filter(cat => cat.id !== id);
-
-  if (filtered.length === categories.length) {
-    console.error('Category not found:', id);
-    return false;
-  }
-
+export async function deleteCategory(id: string): Promise<boolean> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    const response = await fetch(`/api/admin/categories/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error deleting category:', error);
+      throw new Error(error.error || 'Nie udało się usunąć kategorii');
+    }
+
     return true;
   } catch (error) {
     console.error('Error deleting category:', error);
-    return false;
+    throw error;
   }
 }
 
 /**
  * Get category names only (for dropdowns)
+ * Helper function that fetches all categories and returns just the names
  */
-export function getCategoryNames(): string[] {
-  const categories = getAllCategories();
-  return categories.map(cat => cat.name);
+export async function getCategoryNames(): Promise<string[]> {
+  try {
+    const categories = await getAllCategories();
+    return categories.map(cat => cat.name);
+  } catch (error) {
+    console.error('Error getting category names:', error);
+    return [];
+  }
 }

@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Flame, Droplets, Leaf } from "lucide-react";
-import { getHomepageContent, initializeHomepageStore } from "@/lib/homepage-store";
 import type { CategoryIntro, CategoryCard } from "@/types/homepage";
 
 // Icon mapping for categories
@@ -13,18 +11,13 @@ const categoryIcons = [Flame, Droplets, Leaf];
 // ID mapping for anchor links (matches header navigation)
 const categoryIds = ['heating', 'sanitary', 'irrigation'];
 
-export function CategoriesSection() {
-  const [intro, setIntro] = useState<CategoryIntro | null>(null);
-  const [cards, setCards] = useState<CategoryCard[]>([]);
+interface CategoriesSectionProps {
+  intro: CategoryIntro;
+  cards: CategoryCard[];
+}
 
-  useEffect(() => {
-    initializeHomepageStore();
-    const data = getHomepageContent();
-    setIntro(data.categoriesIntro);
-    setCards(data.categoryCards);
-  }, []);
-
-  if (!intro || cards.length === 0) {
+export function CategoriesSection({ intro, cards }: CategoriesSectionProps) {
+  if (!intro || !cards || cards.length === 0) {
     return null;
   }
   return (

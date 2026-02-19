@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { getAllProducts, initializeStore } from '@/lib/products-store';
+import { getAllProducts } from '@/lib/products-store';
 import type { Product } from '@/types/product';
 
 interface HeaderSearchBarProps {
@@ -35,24 +35,29 @@ export function HeaderSearchBar({
       return;
     }
 
-    const timer = setTimeout(() => {
-      initializeStore();
-      const allProducts = getAllProducts();
-      const searchLower = query.toLowerCase();
+    const timer = setTimeout(async () => {
+      try {
+        const allProducts = await getAllProducts();
+        const searchLower = query.toLowerCase();
 
-      const matches = allProducts
-        .filter(p =>
-          p.status === 'active' && (
-            p.name.toLowerCase().includes(searchLower) ||
-            (p.description && p.description.toLowerCase().includes(searchLower)) ||
-            (p.category && p.category.toLowerCase().includes(searchLower))
+        const matches = allProducts
+          .filter(p =>
+            p.status === 'active' && (
+              p.name.toLowerCase().includes(searchLower) ||
+              (p.description && p.description.toLowerCase().includes(searchLower)) ||
+              (p.category && p.category.toLowerCase().includes(searchLower))
+            )
           )
-        )
-        .slice(0, 5);
+          .slice(0, 5);
 
-      setSuggestions(matches);
-      setIsOpen(matches.length > 0);
-      setSelectedIndex(-1);
+        setSuggestions(matches);
+        setIsOpen(matches.length > 0);
+        setSelectedIndex(-1);
+      } catch (error) {
+        console.error('Error searching products:', error);
+        setSuggestions([]);
+        setIsOpen(false);
+      }
     }, 300);
 
     return () => clearTimeout(timer);

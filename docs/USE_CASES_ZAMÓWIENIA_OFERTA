@@ -1,0 +1,8 @@
+Use Case 1:
+Skupmy się na generalizacji statusów zamówień. Obecnie widzę kilka - uwaga! - są różne w supabase oraz 
+różne w apliakcji admin. Według mnie na razie wystarczą mi tylko 3 statusy: "W realizacji", "Gotowe" oraz 
+"Anulowane".
+Chodzi mi o to, że nie mam jeszcze całego procesu sprzedażowego - to będzie w wersji kolejnej mojej aplikacji.
+Dzisiaj chcę aby: Klient mógł wysłać zapytanie -> "W realizacji", admin / pracownik -> mógł zmienić statusy
+na "Gotowe" lub "Anulowane" (można będzie podać przyczynę anulowania).
+

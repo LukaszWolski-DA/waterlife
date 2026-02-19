@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Download } from 'lucide-react';
 import type { Product, ProductImage } from '@/types/product';
 
 // Helper do pobierania glownego zdjecia
@@ -137,6 +137,87 @@ export default function AdminProductsPage() {
     );
   };
 
+  // CSV Export functionality
+  const handleExportCSV = () => {
+    try {
+      // Użyj przefiltrowanych produktów (respektuje search i category filter)
+      const dataToExport = filteredProducts;
+
+      if (dataToExport.length === 0) {
+        toast({
+          title: 'Brak produktów do eksportu',
+          description: 'Nie ma produktów spełniających kryteria filtrowania.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // CSV Header
+      const headers = ['ID', 'Nazwa', 'Kategoria', 'Producent', 'Cena', 'Status', 'Opis', 'Słowa kluczowe'];
+
+      // CSV Rows
+      const rows = dataToExport.map((product) => [
+        product.id,
+        product.name,
+        product.category || '',
+        product.manufacturer || '',
+        product.price.toString(),
+        product.status || 'active',
+        (product.description || '').replace(/\n/g, ' '), // Remove newlines
+        product.keywords?.join('; ') || '',
+      ]);
+
+      // Escape CSV values (handle commas, quotes, newlines)
+      const escapeCSV = (value: string): string => {
+        if (!value) return '';
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      };
+
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map((row) => row.map(escapeCSV).join(','))
+      ].join('\n');
+
+      // Generate timestamp: YYYYMMDD_HHMMSS
+      const now = new Date();
+      const timestamp = now.toISOString()
+        .replace(/[-:]/g, '')
+        .replace('T', '_')
+        .slice(0, 15); // YYYYMMDD_HHMMSS
+
+      const filename = `WaterLifeProductsExport_${timestamp}.csv`;
+
+      // Download file (UTF-8 with BOM for Excel compatibility)
+      const blob = new Blob(['\uFEFF' + csvContent], { 
+        type: 'text/csv;charset=utf-8;' 
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      toast({
+        title: 'Eksport zakończony',
+        description: `Wyeksportowano ${dataToExport.length} produktów do ${filename}`,
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: 'Błąd eksportu',
+        description: 'Nie udało się wyeksportować produktów.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -150,12 +231,18 @@ export default function AdminProductsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Produkty</CardTitle>
-          <Link href="/admin/produkty/dodaj">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Dodaj produkt
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportCSV}>
+              <Download className="mr-2 h-4 w-4" />
+              Eksportuj CSV
             </Button>
-          </Link>
+            <Link href="/admin/produkty/dodaj">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Dodaj produkt
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
 
         <CardContent>

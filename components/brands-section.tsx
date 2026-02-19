@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getHomepageContent, initializeHomepageStore } from "@/lib/homepage-store";
 import type { BrandsContent } from "@/types/homepage";
 
-export function BrandsSection() {
-  const [content, setContent] = useState<BrandsContent | null>(null);
+interface BrandsSectionProps {
+  content: BrandsContent;
+}
 
-  useEffect(() => {
-    initializeHomepageStore();
-    const data = getHomepageContent();
-    setContent(data.brands);
-  }, []);
-
+export function BrandsSection({ content }: BrandsSectionProps) {
   if (!content) {
     return null;
   }

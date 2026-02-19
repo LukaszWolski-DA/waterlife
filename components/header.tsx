@@ -151,39 +151,24 @@ export function Header() {
                   {pathname !== '/produkty' && (
                     <HeaderSearchBar onSearch={() => setIsOpen(false)} />
                   )}
-                  <nav className="flex flex-col gap-2">
-                    {navigation.map((item) => {
-                      const isSectionLink = item.href.startsWith('#');
-                      const isDisabled = isSectionLink && !isHomePage;
-
-                      return (
+                  {/* Navigation - tylko na stronie głównej */}
+                  {isHomePage && (
+                    <nav className="flex flex-col gap-2">
+                      {navigation.map((item) => (
                         <a
                           key={item.name}
-                          href={isDisabled ? undefined : item.href}
-                          onClick={
-                            isDisabled
-                              ? undefined
-                              : (e) => {
-                                  handleSmoothScroll(e, item.href);
-                                  setIsOpen(false);
-                                }
-                          }
-                          className={`px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-                            isDisabled
-                              ? 'text-foreground/30 cursor-default'
-                              : 'text-foreground hover:bg-secondary cursor-pointer'
-                          }`}
+                          href={item.href}
+                          onClick={(e) => {
+                            handleSmoothScroll(e, item.href);
+                            setIsOpen(false);
+                          }}
+                          className="px-4 py-3 text-sm font-medium rounded-md transition-colors text-foreground hover:bg-secondary cursor-pointer"
                         >
                           {item.name}
-                          {isDisabled && (
-                            <span className="block text-xs text-muted-foreground mt-1">
-                              Tylko na stronie głównej
-                            </span>
-                          )}
                         </a>
-                      );
-                    })}
-                  </nav>
+                      ))}
+                    </nav>
+                  )}
                   {/* User section */}
                   <div className="border-t pt-4 mt-4">
                     <p className="text-sm font-medium mb-2">Twoje konto</p>

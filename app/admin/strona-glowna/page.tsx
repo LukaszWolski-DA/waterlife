@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, RotateCcw } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useHomepageAdmin } from '@/hooks/use-homepage-admin';
 import { useToast } from '@/hooks/use-toast';
 import type { HomepageFormData } from '@/types/homepage';
@@ -17,7 +17,7 @@ import type { HomepageFormData } from '@/types/homepage';
  * Edycja treści na stronie głównej
  */
 export default function HomepageAdminPage() {
-  const { content, loading, updateContent, resetContent } = useHomepageAdmin();
+  const { content, loading, updateContent } = useHomepageAdmin();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<HomepageFormData | null>(null);
@@ -82,34 +82,6 @@ export default function HomepageAdminPage() {
     }
   };
 
-  const handleReset = async () => {
-    if (!confirm('Czy na pewno chcesz przywrócić domyślne wartości? Wszystkie zmiany zostaną utracone.')) {
-      return;
-    }
-
-    try {
-      const reset = await resetContent();
-      setFormData({
-        hero: reset.hero,
-        stats: reset.stats,
-        contact: reset.contact,
-        categoriesIntro: reset.categoriesIntro,
-        categoryCards: reset.categoryCards,
-        brands: reset.brands,
-      });
-      toast({
-        title: 'Przywrócono domyślne wartości',
-        description: 'Treść strony została zresetowana.',
-      });
-    } catch (error) {
-      toast({
-        title: 'Błąd',
-        description: 'Nie udało się przywrócić domyślnych wartości.',
-        variant: 'destructive',
-      });
-    }
-  };
-
   if (loading || !formData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -127,20 +99,10 @@ export default function HomepageAdminPage() {
             Edytuj treści wyświetlane na stronie głównej
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            disabled={saving}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Przywróć domyślne
-          </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? 'Zapisywanie...' : 'Zapisz zmiany'}
-          </Button>
-        </div>
+        <Button onClick={handleSubmit} disabled={saving}>
+          <Save className="mr-2 h-4 w-4" />
+          {saving ? 'Zapisywanie...' : 'Zapisz zmiany'}
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit}>

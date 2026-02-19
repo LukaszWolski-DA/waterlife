@@ -1,39 +1,52 @@
 /**
  * Typy TypeScript dla wiadomości kontaktowych
+ * Zgodne ze strukturą tabeli contact_messages w Supabase
  */
 
 export type MessageStatus =
-  | 'unread'    // Nieprzeczytana
+  | 'new'       // Nowa (nieprzeczytana)
   | 'read'      // Przeczytana
   | 'replied'   // Odpowiedziana
   | 'archived'; // Zarchiwizowana
 
-export interface ContactMessage {
-  id: string;
+/**
+ * Struktura customer_info (JSONB w Supabase)
+ */
+export interface CustomerInfo {
   name: string;
   email: string;
-  subject?: string;
-  message: string;
-  attachmentUrl?: string;
-  attachmentName?: string;
-  status: MessageStatus;
-  createdAt: string;
-  readAt?: string;
-  repliedAt?: string;
+  phone?: string;
 }
 
+/**
+ * ContactMessage - zgodny z tabelą contact_messages
+ */
+export interface ContactMessage {
+  id: string;
+  customer_info: CustomerInfo;
+  subject?: string | null;
+  message: string;
+  status: MessageStatus;
+  admin_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Dane z formularza kontaktowego (do wysłania)
+ */
 export interface ContactFormData {
   name: string;
   email: string;
+  phone?: string;
   subject?: string;
   message: string;
-  attachment?: File;
 }
 
-export interface ContactReply {
-  id: string;
-  messageId: string;
-  replyText: string;
-  repliedBy: string; // ID administratora
-  createdAt: string;
+/**
+ * Dane do aktualizacji wiadomości (admin)
+ */
+export interface ContactMessageUpdate {
+  status?: MessageStatus;
+  admin_notes?: string;
 }

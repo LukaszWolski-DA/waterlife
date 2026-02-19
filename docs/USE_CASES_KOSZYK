@@ -1,0 +1,59 @@
+Dotyczy: http://localhost:3000/koszyk
+
+Use Case 1: Hybrydowy Koszyk Zakupowy (Guest + Auth)
+Technologie: Next.js, Supabase, Zustand/React Context
+1. Założenia biznesowe
+Gość: Może przeglądać sklep i dodawać produkty do koszyka bez logowania (dane trzymane lokalnie).
+Użytkownik zalogowany: Koszyk jest synchronizowany z bazą danych Supabase (dostępny na każdym urządzeniu).
+Logowanie w locie: Jeśli gość ma produkty w koszyku i zaloguje się, produkty z localStorage zostają przesłane do bazy danych (Merge).
+Checkout: Uproszczony proces zamówienia bez konieczności zakładania konta (Guest Checkout).
+2. Architektura danych
+Po stronie klienta (Zustand / LocalStorage):
+Zarządzanie stanem za pomocą Zustand z middleware persist, aby dane przetrwały odświeżenie strony (F5).
+typescript
+interface CartItem {
+  productId: string;
+  quantity: number;
+  price: number;
+  title: string;
+}
+Używaj kodu z rozwagą.
+
+Po stronie serwera (Supabase Table cart_items):
+Kolumna	Typ	Opis
+id	UUID	Primary Key
+user_id	UUID (FK)	Link do auth.users (Nullable dla gości, jeśli decydujemy się trzymać ich w DB)
+product_id	UUID (FK)	Link do tabeli produktów
+quantity	Integer	Ilość (min: 1)
+3. Flow Użytkownika (Scenariusze)
+Scenariusz A: Zakupy bez logowania
+Użytkownik klika "Dodaj do koszyka".
+System sprawdza sesję przez Supabase Auth.
+Brak sesji -> Dodaj element do Zustand Store (automatyczny zapis w localStorage).
+Checkout -> Użytkownik podaje e-mail w formularzu -> Tworzone jest zamówienie w tabeli orders z flagą is_guest = true.
+Scenariusz B: Logowanie (Merge Cart)
+Użytkownik ma 2 przedmioty w localStorage.
+Klika "Zaloguj się" i przechodzi proces autoryzacji.
+Hook useEffect nasłuchuje zmiany stanu przez onAuthStateChange.
+Po wykryciu zalogowania:
+Pobierz elementy z localStorage.
+Wyślij je do bazy Supabase (upsert do tabeli cart_items).
+Wyczyść localStorage, aby uniknąć duplikacji.
+4. Wytyczne do implementacji (Prompt dla Agenta)
+"Zaimplementuj system koszyka dla Next.js i Supabase. Wykorzystaj bibliotekę Zustand do zarządzania stanem.
+Stwórz useCartStore z funkcjami addItem, removeItem, updateQuantity.
+Dodaj mechanizm Persistence, aby koszyk gościa był zapisywany w localStorage.
+Stwórz komponent CartSync, który po zalogowaniu (wykorzystaj supabase.auth.onAuthStateChange) zsynchronizuje lokalne produkty z tabelą cart_items w bazie danych.
+Obsłuż przypadek 'upsert' – jeśli ten sam produkt jest w bazie i w localStorage, zsumuj ilości."
+
+Use Case 2: Powiadomienie mailowe o zamówieniu
+Technologie: Next.js, Supabase, Resend
+1. Założenia biznesowe
+Powiadomienie mailowe o zamówieniu wysyłane po złożeniu zamówienia.
+Powiadomienie wysyłane do adresu email zamawiającego.
+Powiadomienie zawiera informacje o zamówieniu: numer zamówienia, data zamówienia, produkty, suma, status zamówienia.
+
+Use Case 3: W formularzu "Wyślij zapytanie ofertowe" powinny pojawić się dane osobowe i firmowe zalogowanego użytkownika.
+Użytkownik może zmienić te dane na nowe - jeżeli będzie to wymagane przez klienta.
+
+

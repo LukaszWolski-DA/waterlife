@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getHomepageContent, initializeHomepageStore } from "@/lib/homepage-store";
 import type { StatItem } from "@/types/homepage";
 
-export function StatsSection() {
-  const [stats, setStats] = useState<StatItem[]>([]);
+interface StatsSectionProps {
+  stats: StatItem[];
+}
 
-  useEffect(() => {
-    initializeHomepageStore();
-    const data = getHomepageContent();
-    setStats(data.stats);
-  }, []);
+export function StatsSection({ stats }: StatsSectionProps) {
+  if (!stats || stats.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-primary" suppressHydrationWarning>

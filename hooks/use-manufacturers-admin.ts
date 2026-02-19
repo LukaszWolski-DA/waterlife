@@ -6,25 +6,27 @@ import {
   createManufacturer,
   updateManufacturer,
   deleteManufacturer,
-  initializeManufacturersStore,
   manufacturerNameExists,
   findManufacturerByName,
 } from '@/lib/manufacturers-store';
 
+/**
+ * Hook for managing manufacturers in admin panel
+ * Updated to work with asynchronous API calls
+ */
 export function useManufacturersAdmin() {
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadManufacturers = useCallback(() => {
+  const loadManufacturers = useCallback(async () => {
     try {
       setLoading(true);
-      initializeManufacturersStore();
-      const data = getAllManufacturers();
+      const data = await getAllManufacturers();
       setManufacturers(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load manufacturers');
+      setError('Nie udało się załadować producentów');
       console.error(err);
     } finally {
       setLoading(false);
@@ -35,17 +37,17 @@ export function useManufacturersAdmin() {
     loadManufacturers();
   }, [loadManufacturers]);
 
-  const getManufacturer = useCallback((id: string) => {
-    return getManufacturerById(id);
+  const getManufacturer = useCallback(async (id: string) => {
+    return await getManufacturerById(id);
   }, []);
 
   const addManufacturer = useCallback(async (data: ManufacturerFormData) => {
     try {
-      const newManufacturer = createManufacturer(data);
+      const newManufacturer = await createManufacturer(data);
       setManufacturers(prev => [...prev, newManufacturer]);
       return newManufacturer;
     } catch (err) {
-      setError('Failed to create manufacturer');
+      setError('Nie udało się utworzyć producenta');
       console.error(err);
       throw err;
     }
@@ -53,16 +55,16 @@ export function useManufacturersAdmin() {
 
   const editManufacturer = useCallback(async (id: string, data: Partial<ManufacturerFormData>) => {
     try {
-      const updated = updateManufacturer(id, data);
+      const updated = await updateManufacturer(id, data);
       if (updated) {
         setManufacturers(prev =>
           prev.map(m => (m.id === id ? updated : m))
         );
         return updated;
       }
-      throw new Error('Manufacturer not found');
+      throw new Error('Producent nie znaleziony');
     } catch (err) {
-      setError('Failed to update manufacturer');
+      setError('Nie udało się zaktualizować producenta');
       console.error(err);
       throw err;
     }
@@ -70,24 +72,24 @@ export function useManufacturersAdmin() {
 
   const removeManufacturer = useCallback(async (id: string) => {
     try {
-      const success = deleteManufacturer(id);
+      const success = await deleteManufacturer(id);
       if (success) {
         setManufacturers(prev => prev.filter(m => m.id !== id));
       }
       return success;
     } catch (err) {
-      setError('Failed to delete manufacturer');
+      setError('Nie udało się usunąć producenta');
       console.error(err);
       return false;
     }
   }, []);
 
-  const checkNameExists = useCallback((name: string, excludeId?: string): boolean => {
-    return manufacturerNameExists(name, excludeId);
+  const checkNameExists = useCallback(async (name: string, excludeId?: string): Promise<boolean> => {
+    return await manufacturerNameExists(name, excludeId);
   }, []);
 
-  const findByName = useCallback((name: string): Manufacturer | null => {
-    return findManufacturerByName(name);
+  const findByName = useCallback(async (name: string): Promise<Manufacturer | null> => {
+    return await findManufacturerByName(name);
   }, []);
 
   const refetch = useCallback(() => {

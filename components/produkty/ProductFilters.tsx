@@ -9,14 +9,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown } from 'lucide-react';
 import { useProductFilters } from '@/contexts/ProductFiltersContext';
-import { initializeCategoriesStore, getCategoryNames } from '@/lib/categories-store';
-import { initializeManufacturersStore, getManufacturerNames } from '@/lib/manufacturers-store';
+import { getAllCategories, getAllManufacturers } from '@/lib/supabase/metadata';
 
 /**
  * Product Filters Component
  * Left sidebar filtering panel with:
- * - Categories (multiselect checkboxes)
- * - Manufacturers (dropdown with multiselect)
+ * - Categories (multiselect checkboxes) - loaded from Supabase via metadata.ts
+ * - Manufacturers (dropdown with multiselect) - loaded from Supabase via metadata.ts
  * - Price range (from/to inputs)
  * - Availability (in stock checkbox)
  */
@@ -36,15 +35,19 @@ export default function ProductFilters({ onFilterChange }: ProductFiltersProps =
   const [localMaxPrice, setLocalMaxPrice] = useState<string>('');
 
   useEffect(() => {
-    // Load categories
-    initializeCategoriesStore();
-    const loadedCategories = getCategoryNames();
-    setCategories(loadedCategories);
+    // Load categories from Supabase
+    async function loadCategories() {
+      const loadedCategories = await getAllCategories();
+      setCategories(loadedCategories);
+    }
+    loadCategories();
 
-    // Load manufacturers
-    initializeManufacturersStore();
-    const loadedManufacturers = getManufacturerNames();
-    setManufacturers(loadedManufacturers);
+    // Load manufacturers from Supabase
+    async function loadManufacturers() {
+      const loadedManufacturers = await getAllManufacturers();
+      setManufacturers(loadedManufacturers);
+    }
+    loadManufacturers();
   }, []);
 
   // Debounce price updates (500ms)
@@ -82,6 +85,11 @@ export default function ProductFilters({ onFilterChange }: ProductFiltersProps =
     onFilterChange?.();
   };
 
+  // Clear all categories
+  const clearCategories = () => {
+    updateFilter('categories', []);
+  };
+
   // Clear all manufacturers
   const clearManufacturers = () => {
     updateFilter('manufacturers', []);
@@ -89,31 +97,53 @@ export default function ProductFilters({ onFilterChange }: ProductFiltersProps =
 
   return (
     <div className="space-y-6">
-      {/* Categories */}
+      {/* Categories Dropdown (Collapsible) */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Kategoria</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {categories.length > 0 ? (
-            categories.map(category => (
-              <div key={category} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`category-${category}`}
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
-                />
-                <Label
-                  htmlFor={`category-${category}`}
-                  className="text-sm font-normal cursor-pointer flex-1"
-                >
-                  {category}
-                </Label>
+        <CardContent>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                {filters.categories.length === 0
+                  ? 'Wszystkie kategorie'
+                  : `Kategorie (${filters.categories.length})`}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-sm">Wybierz kategorie</span>
+                  {filters.categories.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearCategories}>
+                      Wyczyść
+                    </Button>
+                  )}
+                </div>
+                {categories.length > 0 ? (
+                  categories.map(category => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category}`}
+                        checked={filters.categories.includes(category)}
+                        onCheckedChange={() => toggleCategory(category)}
+                      />
+                      <label
+                        htmlFor={`category-${category}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {category}
+                      </label>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Brak kategorii</p>
+                )}
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">Brak kategorii</p>
-          )}
+            </PopoverContent>
+          </Popover>
         </CardContent>
       </Card>
 

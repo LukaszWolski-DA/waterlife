@@ -1,193 +1,192 @@
 import type { Manufacturer, ManufacturerFormData } from '@/types/manufacturer';
 
-const STORAGE_KEY = 'waterlife_manufacturers';
-
-// Initial manufacturers (mock data)
-const INITIAL_MANUFACTURERS: Manufacturer[] = [
-  {
-    id: '1',
-    name: 'Viessmann',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Buderus',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Vaillant',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    name: 'Junkers',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+/**
+ * Manufacturers Store - API version (migrated from localStorage to Supabase)
+ * All functions are now asynchronous and interact with /api/admin/manufacturers
+ */
 
 /**
- * Initialize manufacturers store with mock data if empty
+ * Get all manufacturers from API
  */
-export function initializeManufacturersStore(): void {
-  if (typeof window === 'undefined') return;
-
+export async function getAllManufacturers(): Promise<Manufacturer[]> {
   try {
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (!existing) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_MANUFACTURERS));
-    }
-  } catch (error) {
-    console.error('Error initializing manufacturers store:', error);
-  }
-}
+    const response = await fetch('/api/admin/manufacturers', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
 
-/**
- * Get all manufacturers from localStorage
- */
-export function getAllManufacturers(): Manufacturer[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-      initializeManufacturersStore();
-      return INITIAL_MANUFACTURERS;
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error fetching manufacturers:', error);
+      throw new Error(error.error || 'Nie udało się pobrać producentów');
     }
-    return JSON.parse(data) as Manufacturer[];
+
+    const { manufacturers } = await response.json();
+    return manufacturers;
   } catch (error) {
     console.error('Error getting manufacturers:', error);
-    return [];
+    throw error;
   }
 }
 
 /**
- * Get manufacturer by ID
+ * Get manufacturer by ID from API
  */
-export function getManufacturerById(id: string): Manufacturer | null {
-  const manufacturers = getAllManufacturers();
-  return manufacturers.find(m => m.id === id) || null;
-}
-
-/**
- * Check if manufacturer name already exists (case-insensitive)
- * Used for duplicate detection in forms
- */
-export function manufacturerNameExists(name: string, excludeId?: string): boolean {
-  const manufacturers = getAllManufacturers();
-  const normalizedName = name.trim().toLowerCase();
-
-  return manufacturers.some(m =>
-    m.name.toLowerCase() === normalizedName && m.id !== excludeId
-  );
-}
-
-/**
- * Find manufacturer by name (case-insensitive, returns closest match)
- */
-export function findManufacturerByName(name: string): Manufacturer | null {
-  const manufacturers = getAllManufacturers();
-  const normalizedName = name.trim().toLowerCase();
-
-  return manufacturers.find(m => m.name.toLowerCase() === normalizedName) || null;
-}
-
-/**
- * Create a new manufacturer
- */
-export function createManufacturer(data: ManufacturerFormData): Manufacturer {
-  const manufacturers = getAllManufacturers();
-
-  // Check for duplicate names
-  if (manufacturerNameExists(data.name)) {
-    throw new Error(`Producent "${data.name}" już istnieje`);
-  }
-
-  const newManufacturer: Manufacturer = {
-    ...data,
-    name: data.name.trim(),
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  manufacturers.push(newManufacturer);
-
+export async function getManufacturerById(id: string): Promise<Manufacturer | null> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(manufacturers));
+    const response = await fetch(`/api/admin/manufacturers/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      const error = await response.json();
+      console.error('Error fetching manufacturer:', error);
+      throw new Error(error.error || 'Nie udało się pobrać producenta');
+    }
+
+    const { manufacturer } = await response.json();
+    return manufacturer;
+  } catch (error) {
+    console.error('Error getting manufacturer:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new manufacturer via API
+ */
+export async function createManufacturer(data: ManufacturerFormData): Promise<Manufacturer> {
+  try {
+    const response = await fetch('/api/admin/manufacturers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error creating manufacturer:', error);
+      throw new Error(error.error || 'Nie udało się utworzyć producenta');
+    }
+
+    const { manufacturer } = await response.json();
+    return manufacturer;
   } catch (error) {
     console.error('Error creating manufacturer:', error);
-    throw new Error('Failed to create manufacturer');
+    throw error;
   }
-
-  return newManufacturer;
 }
 
 /**
- * Update an existing manufacturer
+ * Update an existing manufacturer via API
  */
-export function updateManufacturer(id: string, data: Partial<ManufacturerFormData>): Manufacturer | null {
-  const manufacturers = getAllManufacturers();
-  const index = manufacturers.findIndex(m => m.id === id);
-
-  if (index === -1) {
-    console.error('Manufacturer not found:', id);
-    return null;
-  }
-
-  // Check for duplicate names (excluding current manufacturer)
-  if (data.name && manufacturerNameExists(data.name, id)) {
-    throw new Error(`Producent "${data.name}" już istnieje`);
-  }
-
-  const updated: Manufacturer = {
-    ...manufacturers[index],
-    ...data,
-    name: data.name ? data.name.trim() : manufacturers[index].name,
-    updatedAt: new Date().toISOString(),
-  };
-
-  manufacturers[index] = updated;
-
+export async function updateManufacturer(id: string, data: Partial<ManufacturerFormData>): Promise<Manufacturer> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(manufacturers));
+    const response = await fetch(`/api/admin/manufacturers/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error updating manufacturer:', error);
+      throw new Error(error.error || 'Nie udało się zaktualizować producenta');
+    }
+
+    const { manufacturer } = await response.json();
+    return manufacturer;
   } catch (error) {
     console.error('Error updating manufacturer:', error);
-    throw new Error('Failed to update manufacturer');
+    throw error;
   }
-
-  return updated;
 }
 
 /**
- * Delete a manufacturer
+ * Delete a manufacturer via API
  */
-export function deleteManufacturer(id: string): boolean {
-  const manufacturers = getAllManufacturers();
-  const filtered = manufacturers.filter(m => m.id !== id);
-
-  if (filtered.length === manufacturers.length) {
-    console.error('Manufacturer not found:', id);
-    return false;
-  }
-
+export async function deleteManufacturer(id: string): Promise<boolean> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    const response = await fetch(`/api/admin/manufacturers/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error deleting manufacturer:', error);
+      throw new Error(error.error || 'Nie udało się usunąć producenta');
+    }
+
     return true;
   } catch (error) {
     console.error('Error deleting manufacturer:', error);
-    return false;
+    throw error;
   }
 }
 
 /**
  * Get manufacturer names only (for dropdowns)
+ * Helper function that fetches all manufacturers and returns just the names
  */
-export function getManufacturerNames(): string[] {
-  const manufacturers = getAllManufacturers();
-  return manufacturers.map(m => m.name);
+export async function getManufacturerNames(): Promise<string[]> {
+  try {
+    const manufacturers = await getAllManufacturers();
+    return manufacturers.map(m => m.name);
+  } catch (error) {
+    console.error('Error getting manufacturer names:', error);
+    return [];
+  }
+}
+
+/**
+ * Check if manufacturer name already exists (case-insensitive)
+ * Used for duplicate detection in forms (client-side validation helper)
+ */
+export async function manufacturerNameExists(name: string, excludeId?: string): Promise<boolean> {
+  try {
+    const manufacturers = await getAllManufacturers();
+    const normalizedName = name.trim().toLowerCase();
+
+    return manufacturers.some(m =>
+      m.name.toLowerCase() === normalizedName && m.id !== excludeId
+    );
+  } catch (error) {
+    console.error('Error checking manufacturer name:', error);
+    return false;
+  }
+}
+
+/**
+ * Find manufacturer by name (case-insensitive, returns closest match)
+ */
+export async function findManufacturerByName(name: string): Promise<Manufacturer | null> {
+  try {
+    const manufacturers = await getAllManufacturers();
+    const normalizedName = name.trim().toLowerCase();
+
+    return manufacturers.find(m => m.name.toLowerCase() === normalizedName) || null;
+  } catch (error) {
+    console.error('Error finding manufacturer by name:', error);
+    return null;
+  }
 }

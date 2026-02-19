@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,17 +10,20 @@ import CartItem from '@/components/koszyk/CartItem';
 import CartSummary from '@/components/koszyk/CartSummary';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { Send } from 'lucide-react';
+import { Send, ArrowLeft } from 'lucide-react';
 
 /**
  * Strona koszyka zakupowego
  * Wyświetla produkty w koszyku, pozwala na zmianę ilości i przejście do zamówienia
  */
 export default function CartPage() {
+  const router = useRouter();
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
   const { isAuthenticated, user } = useAuth();
+  const { profile } = useUserProfile();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,20 +39,19 @@ export default function CartPage() {
 
   // Autouzupełnianie formularza dla zalogowanych użytkowników
   useEffect(() => {
-    if (isAuthenticated && user) {
-      // Rozdziel full name na imię i nazwisko
-      const nameParts = user.name.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || ''; // Reszta to nazwisko (może być wieloczłonowe)
-
+    if (isAuthenticated && user && profile) {
       setFormData((prev) => ({
         ...prev,
-        firstName,
-        lastName,
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
         email: user.email,
+        phone: profile.phone || '',
+        company: profile.company || '',
+        nip: profile.nip || '',
+        // message pozostaje puste - użytkownik wpisuje za każdym razem
       }));
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, profile]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -150,7 +153,18 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Koszyk</h1>
+      {/* Header z przyciskiem powrotu */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold">Koszyk</h1>
+        <Button
+          variant="outline"
+          onClick={() => router.push('/produkty')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Kontynuuj zakupy
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Lista produktów w koszyku */}

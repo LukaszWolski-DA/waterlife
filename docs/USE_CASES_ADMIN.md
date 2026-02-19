@@ -73,3 +73,70 @@ Mozliwosc importu listy produktow z CSV (przydatne przy dodawaniu wielu produkto
 Analogicznie - eksport listy produktow do CSV.
 
 **Cel:** Masowe zarzadzanie produktami.
+
+## Use Case 8: Zamówienia widoczne w http://localhost:3000/admin/zamowienia
+Chciałbym widzieć wszystkie zamówienia w http://localhost:3000/admin/zamowienia.
+Proponuję podział - zakładkę dla obsłużonych oraz nowych / w trakcie.
+Załadowanie obsłużonych - tylko po wejściu na zakładkę osbłużone - od razu może być z paginacją - np. 20 i dalej, pokaż kolejne.
+Dla aktywnych / w trakcie - pokaż wszystkie. Tutaj uwaga: admin będzie mógł zmienić status.
+W ogóle - trzeba pomyśleć o statusach... tego jeszcze nie wiem, ale zakładam, że statusy to:
+Złożone, W trakcie, Zrealizowano, Anulowano.
+
+## Use Case 9: http://localhost:3000/admin/zamowienia
+Przypadek 1: Widzę kolumnę data - która pokazuje kiedy wpadło zamówienie - zmieńmy nagłówek na Kiedy
+Przypadek 2: Warto by dodać faktyczną datę w formacie YYYY-MM-DD HH:SS abym widział dokładną datę złożenia zamówienia
+Przypadek 3: Filtrowanie tabeli zamówień - Aktywnych oraz Obsłużonych - zdaję się na Twoją rekomendację! Ma być praktyczne od strony administracji zamównieniami.
+
+## Use Case 10: http://localhost:3000/admin/strona-glowna
+Jak zapewne wiesz przeniosłem proste modyfikacje oraz treści strony głównej do http://localhost:3000/admin/strona-glowna
+Upewnij się, że wszystkie elementy mamy obsłużone - mam już na supabase tabelę:
+create table public.homepage_content (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  section text not null,
+  content jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint homepage_content_pkey primary key (id),
+  constraint homepage_content_section_key unique (section)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_homepage_section on public.homepage_content using btree (section) TABLESPACE pg_default;
+
+create trigger update_homepage_content_updated_at BEFORE
+update on homepage_content for EACH row
+execute FUNCTION update_updated_at_column ();
+
+Dane w kolumnie content to:
+{
+  "benefits": [
+    {
+      "title": "Szybka Dostawa",
+      "description": "Realizacja w 24h"
+    },
+    {
+      "title": "Gwarancja Jakości",
+      "description": "Certyfikowane produkty"
+    },
+    {
+      "title": "Wsparcie Techniczne",
+      "description": "Pomoc ekspertów"
+    }
+  ],
+  "subtitle": "Kompleksowa obsługa instalacji wodnych, kanalizacyjnych i systemów ogrzewania dla Twojego domu i firmy.",
+  "mainTitle": "Profesjonalne Rozwiązania Hydrauliczne i Grzewcze",
+  "companyName": "Waterlife s.c.",
+  "ctaButtonPrimary": "Zobacz produkty",
+  "ctaButtonSecondary": "Skontaktuj się"
+}
+
+Wydaje mi się, że to mało... w http://localhost:3000/admin/strona-glowna mam dużo więcej możliwości modyfikacji. Ogólnie - zastanawiam się czy to dobra praktyka, aby trzymać takie rzeczy w bazie? Czy nie w samym kodzie aplikacji i panelu admin
+
+Use Case 11:
+Usuń button "Przywróć domyślne" - niepotrzebne!
+
+Use Case 12: Dashbaord http://localhost:3000/admin
+Warto dodać / uzupełnić metryki danymi - teraz są same zera.
+
+Use Case 13: Eksport listy produktów do CSV http://localhost:3000/admin/produkty
+Nazwa pliku WaterLifeProductsExport_timestamp.csv
+

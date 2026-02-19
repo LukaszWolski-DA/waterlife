@@ -4,23 +4,25 @@ import {
   getHomepageContent,
   updateHomepageContent,
   resetHomepageContent,
-  initializeHomepageStore,
 } from '@/lib/homepage-store';
 
+/**
+ * Hook do zarządzania treściami strony głównej
+ * Używa Supabase API (nie localStorage)
+ */
 export function useHomepageAdmin() {
   const [content, setContent] = useState<HomepageContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadContent = useCallback(() => {
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
-      initializeHomepageStore();
-      const data = getHomepageContent();
-      setContent(data);
       setError(null);
+      const data = await getHomepageContent();
+      setContent(data);
     } catch (err) {
-      setError('Failed to load homepage content');
+      setError('Nie udało się załadować treści strony głównej');
       console.error(err);
     } finally {
       setLoading(false);
@@ -33,11 +35,11 @@ export function useHomepageAdmin() {
 
   const updateContent = useCallback(async (data: HomepageFormData) => {
     try {
-      const updated = updateHomepageContent(data);
+      const updated = await updateHomepageContent(data);
       setContent(updated);
       return updated;
     } catch (err) {
-      setError('Failed to update homepage content');
+      setError('Nie udało się zaktualizować treści');
       console.error(err);
       throw err;
     }
@@ -45,11 +47,11 @@ export function useHomepageAdmin() {
 
   const resetContent = useCallback(async () => {
     try {
-      const reset = resetHomepageContent();
+      const reset = await resetHomepageContent();
       setContent(reset);
       return reset;
     } catch (err) {
-      setError('Failed to reset homepage content');
+      setError('Nie udało się przywrócić domyślnych treści');
       console.error(err);
       throw err;
     }

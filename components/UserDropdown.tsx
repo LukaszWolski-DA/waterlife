@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogIn, UserPlus, LogOut, ShoppingBag } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, ShoppingBag, UserCog } from 'lucide-react';
 import { LoginModal } from '@/components/LoginModal';
 import Link from 'next/link';
 
@@ -74,6 +74,12 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
                 <Link href="/profil/zamowienia">
                   <ShoppingBag className="mr-2 h-4 w-4" />
                   Moje zamowienia
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/profil/edytuj">
+                  <UserCog className="mr-2 h-4 w-4" />
+                  Edytuj profil
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

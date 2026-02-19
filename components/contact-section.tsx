@@ -1,26 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
-import { getHomepageContent, initializeHomepageStore } from "@/lib/homepage-store";
+import { useToast } from "@/hooks/use-toast";
 import type { ContactInfo } from "@/types/homepage";
+import type { ContactFormData } from "@/types/contact";
 
-export function ContactSection() {
-  const [content, setContent] = useState<ContactInfo | null>(null);
+interface ContactSectionProps {
+  content: ContactInfo;
+}
 
-  useEffect(() => {
-    initializeHomepageStore();
-    const data = getHomepageContent();
-    setContent(data.contact);
-  }, []);
+export function ContactSection({ content }: ContactSectionProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
 
   if (!content) {
-    return null; // Loading state
+    return null;
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      toast({
+        title: 'Błąd',
+        description: 'Wypełnij wszystkie wymagane pola',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/kontakt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: 'Wiadomość wysłana!',
+          description: 'Odpowiemy tak szybko, jak to możliwe.',
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: '',
+        });
+      } else {
+        throw new Error(result.error || 'Nie udało się wysłać wiadomości');
+      }
+    } catch (error) {
+      toast({
+        title: 'Błąd',
+        description: error instanceof Error ? error.message : 'Nie udało się wysłać wiadomości',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const contactInfo = [
     {
@@ -119,25 +177,40 @@ export function ContactSection() {
               <h3 className="text-xl font-bold text-foreground mb-6">
                 {content.formTitle}
               </h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label
                       htmlFor="name"
                       className="block text-sm font-medium text-foreground mb-2"
                     >
-                      Imię i nazwisko
+                      Imię i nazwisko <span className="text-destructive">*</span>
                     </label>
-                    <Input id="name" placeholder="Jan Kowalski" />
+                    <Input 
+                      id="name" 
+                      placeholder="Jan Kowalski"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      disabled={loading}
+                      required
+                    />
                   </div>
                   <div>
                     <label
                       htmlFor="email"
                       className="block text-sm font-medium text-foreground mb-2"
                     >
-                      Email
+                      Email <span className="text-destructive">*</span>
                     </label>
-                    <Input id="email" type="email" placeholder="jan@example.com" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="jan@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      disabled={loading}
+                      required
+                    />
                   </div>
                 </div>
                 <div>
@@ -147,24 +220,35 @@ export function ContactSection() {
                   >
                     Telefon
                   </label>
-                  <Input id="phone" type="tel" placeholder="+48 123 456 789" />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="+48 123 456 789"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    disabled={loading}
+                  />
                 </div>
                 <div>
                   <label
                     htmlFor="message"
                     className="block text-sm font-medium text-foreground mb-2"
                   >
-                    Wiadomość
+                    Wiadomość <span className="text-destructive">*</span>
                   </label>
                   <Textarea
                     id="message"
                     placeholder="Opisz swoje potrzeby..."
                     rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    disabled={loading}
+                    required
                   />
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" type="submit" disabled={loading}>
                   <Send className="mr-2 h-4 w-4" />
-                  {content.formButtonText}
+                  {loading ? 'Wysyłanie...' : content.formButtonText}
                 </Button>
               </form>
             </CardContent>

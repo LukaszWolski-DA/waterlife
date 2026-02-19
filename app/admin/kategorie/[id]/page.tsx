@@ -40,19 +40,29 @@ export default function EditCategoryPage() {
   useEffect(() => {
     if (!categoryId) return;
 
-    const category = getCategory(categoryId);
-    if (!category) {
-      setNotFound(true);
-      setLoading(false);
-      return;
+    async function loadCategory() {
+      try {
+        const category = await getCategory(categoryId);
+        if (!category) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+
+        setFormData({
+          name: category.name,
+          description: category.description || '',
+          keywords: category.keywords || [],
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading category:', error);
+        setNotFound(true);
+        setLoading(false);
+      }
     }
 
-    setFormData({
-      name: category.name,
-      description: category.description || '',
-      keywords: category.keywords || [],
-    });
-    setLoading(false);
+    loadCategory();
   }, [categoryId, getCategory]);
 
   const handleAddKeyword = () => {

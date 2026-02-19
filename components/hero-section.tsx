@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Truck, Headphones } from "lucide-react";
-import { getHomepageContent, initializeHomepageStore } from "@/lib/homepage-store";
 import type { HeroContent } from "@/types/homepage";
 
 const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -27,17 +25,13 @@ const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: st
 // Icon mapping for benefits
 const benefitIcons = [Truck, ShieldCheck, Headphones];
 
-export function HeroSection() {
-  const [content, setContent] = useState<HeroContent | null>(null);
+interface HeroSectionProps {
+  content: HeroContent;
+}
 
-  useEffect(() => {
-    initializeHomepageStore();
-    const data = getHomepageContent();
-    setContent(data.hero);
-  }, []);
-
+export function HeroSection({ content }: HeroSectionProps) {
   if (!content) {
-    return null; // Loading state
+    return null;
   }
 
   return (
