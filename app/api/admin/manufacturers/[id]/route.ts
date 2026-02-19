@@ -3,13 +3,17 @@ import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { ManufacturerFormData, Manufacturer } from '@/types/manufacturer';
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 /**
  * GET /api/admin/manufacturers/[id] - pobiera pojedynczego producenta
  * Wymaga autoryzacji admin
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -17,14 +21,20 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Fetch manufacturer
     const { data: manufacturer, error } = await supabase
@@ -64,7 +74,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -72,14 +82,20 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Parse body
     const body = await request.json() as Partial<ManufacturerFormData>;
@@ -161,7 +177,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
     // Auth check
@@ -169,14 +185,20 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Delete manufacturer
     const { error } = await supabase

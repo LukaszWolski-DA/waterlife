@@ -14,11 +14,17 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     // Fetch manufacturers
@@ -64,11 +70,17 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: UNAUTHORIZED_RESPONSE.error },
+        { status: UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     if (!isAdminEmail(user.email || '')) {
-      return ADMIN_UNAUTHORIZED_RESPONSE;
+      return NextResponse.json(
+        { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
+        { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
+      );
     }
 
     // Parse body
