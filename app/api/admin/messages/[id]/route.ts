@@ -9,7 +9,7 @@ import type { ContactMessageUpdate } from '@/types/contact';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Auth check
@@ -24,7 +24,7 @@ export async function GET(
       return ADMIN_UNAUTHORIZED_RESPONSE;
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Fetch message
     const { data: message, error } = await supabase
@@ -56,7 +56,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Auth check
@@ -71,7 +71,7 @@ export async function PATCH(
       return ADMIN_UNAUTHORIZED_RESPONSE;
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json() as ContactMessageUpdate;
 
     // Validation
@@ -139,7 +139,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Auth check
@@ -154,7 +154,7 @@ export async function DELETE(
       return ADMIN_UNAUTHORIZED_RESPONSE;
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Delete message
     const { error } = await supabase
