@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 
 /**
  * API endpoint dla zarządzania zamówieniami w panelu admina
@@ -10,14 +11,14 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createAuthServerClient();
 
-    // Sprawdź sesję użytkownika (TODO: dodać sprawdzenie czy to admin)
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - musisz być zalogowany jako admin' },
-        { status: 401 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: UNAUTHORIZED_RESPONSE.error }, { status: UNAUTHORIZED_RESPONSE.status });
+    }
+
+    if (!isAdminEmail(user.email || '')) {
+      return NextResponse.json({ error: ADMIN_UNAUTHORIZED_RESPONSE.error }, { status: ADMIN_UNAUTHORIZED_RESPONSE.status });
     }
 
     // Pobierz parametry z URL
