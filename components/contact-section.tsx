@@ -10,6 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import type { ContactInfo } from "@/types/homepage";
 import type { ContactFormData } from "@/types/contact";
 
+const FacebookIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
 interface ContactSectionProps {
   content: ContactInfo;
 }
@@ -105,6 +111,12 @@ export function ContactSection({ content }: ContactSectionProps) {
       value: content.workingHours,
       href: "#",
     },
+    {
+      icon: FacebookIcon,
+      title: "Facebook",
+      value: "Waterlife na Facebooku",
+      href: "#",
+    },
   ];
 
   return (
@@ -140,8 +152,8 @@ export function ContactSection({ content }: ContactSectionProps) {
                       <a
                         href={info.href}
                         className="font-medium text-foreground hover:text-primary transition-colors"
-                        target={info.title === "Adres" ? "_blank" : undefined}
-                        rel={info.title === "Adres" ? "noopener noreferrer" : undefined}
+                        target={info.title === "Adres" || info.title === "Facebook" ? "_blank" : undefined}
+                        rel={info.title === "Adres" || info.title === "Facebook" ? "noopener noreferrer" : undefined}
                       >
                         {info.value}
                       </a>

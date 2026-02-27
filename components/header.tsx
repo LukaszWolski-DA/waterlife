@@ -67,6 +67,18 @@ export function Header() {
               <Phone className="h-4 w-4" />
               535-430-854
             </a>
+            <a
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-primary-foreground/80 transition-colors"
+              aria-label="Facebook"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
+              Facebook
+            </a>
           </div>
           <p className="text-primary-foreground/70">
             Profesjonalne rozwiązania dla Twojego domu
@@ -191,6 +203,18 @@ export function Header() {
                       >
                         <Phone className="h-4 w-4" />
                         535-430-854
+                      </a>
+                      <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                        aria-label="Facebook"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                        </svg>
+                        Facebook
                       </a>
                     </div>
                   </div>
