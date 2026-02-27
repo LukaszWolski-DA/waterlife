@@ -59,7 +59,7 @@ export function ImageLightbox({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl w-full p-0 bg-black/95 border-none"
+        className="max-w-[90vw] w-full p-0 bg-black/95 border-none"
         showCloseButton={false}
       >
         {/* Ukryty tytul dla screen readerow */}
@@ -78,7 +78,7 @@ export function ImageLightbox({
         </Button>
 
         {/* Glowne zdjecie */}
-        <div className="relative w-full aspect-square max-h-[80vh]">
+        <div className="relative w-full h-[85vh]">
           {images[currentIndex] ? (
             <Image
               src={images[currentIndex]}

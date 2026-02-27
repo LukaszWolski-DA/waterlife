@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -94,9 +95,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
         {/* Galeria zdjec produktu */}
-        <div>
+        <div className="md:col-span-2">
           <Card className="overflow-hidden">
             <CardContent className="p-4">
               <ProductGallery
@@ -114,7 +115,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
 
         {/* Informacje o produkcie */}
-        <div>
+        <div className="md:col-span-3">
           <div className="mb-4">
             <Badge variant="outline" className="mb-2">
               {product.category}
@@ -142,14 +143,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <span className="text-red-600 font-medium">Brak w magazynie</span>
               )}
             </span>
-          </div>
-
-          {/* Opis */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-3">Opis produktu</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              {product.description}
-            </p>
           </div>
 
           {/* Przycisk dodania do koszyka */}
@@ -190,6 +183,32 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Opis produktu — pełna szerokość */}
+      {product.description && (
+        <div className="mb-16">
+          <h2 className="text-xl font-semibold mb-4">Opis produktu</h2>
+          <div className="text-muted-foreground">
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => <h1 className="text-2xl font-bold mb-3">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-xl font-semibold mb-2">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-lg font-medium mb-2">{children}</h3>,
+                p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
+                li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-primary pl-4 italic my-3">{children}</blockquote>
+                ),
+              }}
+            >
+              {product.description}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
 
       {/* Powiązane produkty */}
       {relatedProducts.length > 0 && (

@@ -65,7 +65,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={mainImageUrl}
               alt={product.name}
               fill
-              className="object-contain"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">

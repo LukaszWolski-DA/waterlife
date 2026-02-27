@@ -48,8 +48,8 @@ export function HeroSection({ content }: HeroSectionProps) {
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/95 to-foreground/60" />
       </div>
 
-      <div className="container relative mx-auto px-4 py-24 md:py-32 lg:py-40">
-        <div className="max-w-2xl">
+      <div className="container relative mx-auto px-4 pt-24 pb-12 md:pt-32 md:pb-16 lg:pt-20 lg:pb-20">
+        <div className="max-w-4xl">
           <p className="text-primary font-medium mb-4 tracking-wide uppercase text-sm">
             {content.companyName}
           </p>

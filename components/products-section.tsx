@@ -100,7 +100,7 @@ export function ProductsSection() {
                         src={getMainImageUrl(product)!}
                         alt={product.name}
                         fill
-                        className="object-contain"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="bg-gray-100 w-full h-full flex items-center justify-center">

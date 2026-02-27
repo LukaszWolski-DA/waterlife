@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { ZoomIn } from 'lucide-react';
 import { ImageLightbox } from './ImageLightbox';
 import type { ProductImage } from '@/types/product';
 
@@ -52,7 +53,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             src={images[selectedIndex].url}
             alt={productName}
             fill
-            className="object-contain"
+            className="object-cover"
             priority
           />
         ) : (
@@ -60,11 +61,9 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             Brak zdjecia
           </div>
         )}
-        {/* Podpowiedz przy hover */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
-          <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-4 py-2 rounded-full text-sm transition-opacity">
-            Kliknij, aby powiekszye
-          </span>
+        {/* Ikona zoom - zawsze widoczna */}
+        <div className="absolute bottom-2 right-2 bg-black/50 rounded-full p-1.5">
+          <ZoomIn className="h-4 w-4 text-white" />
         </div>
       </div>
 
@@ -86,7 +85,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   src={image.url}
                   alt={`${productName} - miniatura ${index + 1}`}
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-[8px]">
