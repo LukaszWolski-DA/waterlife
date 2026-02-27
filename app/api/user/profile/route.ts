@@ -103,8 +103,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    console.log('✅ User profile updated:', userId);
-
     return NextResponse.json({
       success: true,
       profile: updatedProfile,

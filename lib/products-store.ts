@@ -103,7 +103,6 @@ export async function createProduct(data: ProductFormData): Promise<Product> {
       throw new Error(result.error || 'Failed to create product');
     }
 
-    console.log('✅ Created product:', result.data.name);
     return result.data;
   } catch (error) {
     console.error('Error creating product:', error);
@@ -134,7 +133,6 @@ export async function updateProduct(
       return null;
     }
 
-    console.log('✅ Updated product:', result.data.name);
     return result.data;
   } catch (error) {
     console.error('Error updating product:', error);
@@ -158,7 +156,6 @@ export async function deleteProduct(id: string): Promise<boolean> {
       return false;
     }
 
-    console.log('🗑️ Deleted product:', id);
     return true;
   } catch (error) {
     console.error('Error deleting product:', error);

@@ -73,8 +73,6 @@ export async function POST(request: NextRequest) {
       data: { publicUrl },
     } = supabase.storage.from('product-images').getPublicUrl(data.path);
 
-    console.log('✅ Image uploaded to Supabase:', publicUrl);
-
     return NextResponse.json({
       success: true,
       url: publicUrl,

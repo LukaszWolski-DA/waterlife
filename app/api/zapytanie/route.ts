@@ -99,8 +99,6 @@ export async function POST(request: NextRequest) {
       throw new Error('Nie udało się zapisać zamówienia');
     }
 
-    console.log('✅ Order saved to database:', order.id);
-
     // Wysyłka emaili - asynchronicznie (nie blokuje procesu)
     try {
       // Email potwierdzający dla klienta
@@ -137,15 +135,12 @@ export async function POST(request: NextRequest) {
         createdAt: order.created_at,
       });
 
-      if (customerEmailResult.success && officeEmailResult.success) {
-        console.log('✅ Oba emaile wysłane pomyślnie');
-      } else {
-        console.warn('⚠️ Niektóre emaile nie zostały wysłane:');
+      if (!customerEmailResult.success || !officeEmailResult.success) {
         if (!customerEmailResult.success) {
-          console.error('   - Email do klienta: błąd');
+          console.error('Email do klienta: błąd wysyłki');
         }
         if (!officeEmailResult.success) {
-          console.error('   - Email do biura: błąd');
+          console.error('Email do biura: błąd wysyłki');
         }
       }
     } catch (emailError) {
@@ -171,25 +166,12 @@ export async function POST(request: NextRequest) {
         if (cartError) {
           console.error('Error saving cart history:', cartError);
           // Nie przerywaj procesu - zamówienie już jest zapisane
-        } else {
-          console.log('✅ Cart items saved as history:', cartItemsData.length, 'items');
         }
       } catch (error) {
         console.error('Error saving cart items:', error);
         // Nie przerywaj procesu
       }
     }
-
-    // Logowanie szczegółów zamówienia do konsoli
-    console.log('=== NOWE ZAPYTANIE OFERTOWE ===');
-    console.log('ID zamówienia:', order.id);
-    console.log('Klient:', `${customer.firstName} ${customer.lastName}`);
-    console.log('Email:', customer.email);
-    console.log('Telefon:', customer.phone);
-    console.log('Typ:', isGuest ? 'Gość' : 'Zalogowany');
-    console.log('Produkty:', items.length);
-    console.log('Wartość:', `${total.toLocaleString('pl-PL')} zł`);
-    console.log('================================');
 
     return NextResponse.json({
       success: true,

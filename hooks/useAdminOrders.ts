@@ -75,20 +75,12 @@ export function useAdminOrders(
       const url = `/api/admin/orders/${orderId}/status`;
       const payload = { status: newStatus };
       
-      console.log('🔄 [Hook] Aktualizacja statusu:', { orderId, newStatus, url, payload });
-      
       const response = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      });
-
-      console.log('📥 [Hook] Odpowiedź:', { 
-        status: response.status, 
-        ok: response.ok,
-        statusText: response.statusText 
       });
 
       if (!response.ok) {

@@ -34,11 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check session on mount and listen for auth changes
   useEffect(() => {
     let isMounted = true;
-    console.log('🔄 AuthProvider useEffect MOUNT');
 
     // Load user profile from database
     const loadUserProfile = async (authUser: SupabaseUser) => {
-      console.log('👤 loadUserProfile START:', authUser.email);
       try {
         const { data: profile, error } = await supabase
           .from('user_profiles')
@@ -48,14 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Don't update state if component unmounted
         if (!isMounted) {
-          console.log('⚠️ loadUserProfile: component unmounted, skipping state update');
           return;
         }
 
         if (error) {
           // Ignore AbortError - normal unmount case
           if (error.message?.includes('AbortError') || (error as any).name === 'AbortError') {
-            console.log('⚠️ loadUserProfile: AbortError, skipping');
             return;
           }
           console.error('Nie udało się załadować profilu:', error.message || error);
@@ -64,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (profile) {
-          console.log('✅ loadUserProfile SUCCESS:', profile.full_name, profile.role);
           setUser({
             id: authUser.id,
             name: profile.full_name,
@@ -84,9 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('🔍 getSession result:', session?.user?.email || 'NO SESSION');
       if (!isMounted) {
-        console.log('⚠️ getSession: component unmounted, skipping');
         return;
       }
       if (session?.user) {
@@ -100,9 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔑 onAuthStateChange:', event, session?.user?.email || 'NO SESSION');
       if (!isMounted) {
-        console.log('⚠️ onAuthStateChange: component unmounted, skipping');
         return;
       }
       if (session?.user) {
@@ -113,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      console.log('🔄 AuthProvider useEffect CLEANUP');
       isMounted = false;
       subscription.unsubscribe();
     };

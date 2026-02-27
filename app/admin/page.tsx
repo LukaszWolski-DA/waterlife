@@ -56,8 +56,6 @@ export default async function AdminDashboardPage() {
     stats.totalProducts = productsResult.count || 0;
     stats.totalRevenue = revenueResult.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
     
-    console.log('[Dashboard] Stats:', stats);
-    
     // Pobierz ostatnie 5 zamówień
     const { data: orders } = await supabase
       .from('orders')

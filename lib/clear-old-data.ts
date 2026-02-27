@@ -12,8 +12,6 @@ export function clearLegacyLocalStorage(): void {
   const migrated = localStorage.getItem(MIGRATION_FLAG);
   if (migrated) return;
 
-  console.log('🧹 Czyszczenie starych danych localStorage...');
-
   // Clear old product/category/manufacturer and auth data (now in Supabase)
   const keysToRemove = [
     'waterlife_products',
@@ -34,10 +32,4 @@ export function clearLegacyLocalStorage(): void {
   // Set migration flag
   localStorage.setItem(MIGRATION_FLAG, 'true');
 
-  if (removedCount > 0) {
-    console.log(`✅ Wyczyszczono ${removedCount} starych kluczy localStorage`);
-    console.log('💾 Wszystkie dane teraz w Supabase');
-  } else {
-    console.log('✅ Migracja zakończona (brak starych danych)');
-  }
 }
