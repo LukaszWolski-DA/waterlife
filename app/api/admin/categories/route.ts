@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { Category, CategoryFormData } from '@/types/category';
 
@@ -9,27 +10,27 @@ import type { Category, CategoryFormData } from '@/types/category';
  */
 export async function GET() {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
 
     // Auth check
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user } } = await authClient.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[Categories API] Unauthorized access by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    // Pobierz wszystkie kategorie
+    // Pobierz wszystkie kategorie (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: categories, error } = await supabase
       .from('categories')
       .select('*')
@@ -59,20 +60,19 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
 
     // Auth check
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user } } = await authClient.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[Categories API] Unauthorized create attempt by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Utwórz kategorię
+    // Utwórz kategorię (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: category, error } = await supabase
       .from('categories')
       .insert({

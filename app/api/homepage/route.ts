@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 import { isAdminEmail, ADMIN_UNAUTHORIZED_RESPONSE, UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { HomepageContent, HomepageFormData } from '@/types/homepage';
 
@@ -57,12 +58,12 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
 
     // Sprawdź sesję użytkownika
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user } } = await authClient.auth.getUser();
 
-    if (sessionError || !session?.user) {
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
@@ -70,8 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Sprawdź czy user jest adminem
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[HOMEPAGE API] Unauthorized edit attempt by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Zaktualizuj w bazie
+    // Zaktualizuj w bazie (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data, error } = await supabase
       .from('homepage_content')
       .update({

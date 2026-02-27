@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { ManufacturerFormData, Manufacturer } from '@/types/manufacturer';
 
@@ -78,8 +79,8 @@ export async function PATCH(
 ) {
   try {
     // Auth check
-    const supabase = await createAuthServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const authClient = await createAuthServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
 
     if (!user) {
       return NextResponse.json(
@@ -111,7 +112,8 @@ export async function PATCH(
       body.name = body.name.trim();
     }
 
-    // Update manufacturer
+    // Update manufacturer (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: updatedManufacturer, error } = await supabase
       .from('manufacturers')
       .update({
@@ -181,8 +183,8 @@ export async function DELETE(
 ) {
   try {
     // Auth check
-    const supabase = await createAuthServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const authClient = await createAuthServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
 
     if (!user) {
       return NextResponse.json(
@@ -200,7 +202,8 @@ export async function DELETE(
 
     const { id } = await context.params;
 
-    // Delete manufacturer
+    // Delete manufacturer (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { error } = await supabase
       .from('manufacturers')
       .delete()

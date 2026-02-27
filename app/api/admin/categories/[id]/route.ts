@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { CategoryFormData } from '@/types/category';
 
@@ -16,27 +17,28 @@ export async function GET(
   context: RouteContext
 ) {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
     const { id } = await context.params;
 
     // Auth check
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user } } = await authClient.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    if (!isAdminEmail(session.user.email)) {
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    // Pobierz kategorię
+    // Pobierz kategorię (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: category, error } = await supabase
       .from('categories')
       .select('*')
@@ -77,21 +79,20 @@ export async function PATCH(
   context: RouteContext
 ) {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
     const { id } = await context.params;
 
     // Auth check
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user } } = await authClient.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[Categories API] Unauthorized update by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
@@ -122,7 +123,8 @@ export async function PATCH(
       updateData.keywords = body.keywords;
     }
 
-    // Zaktualizuj kategorię
+    // Zaktualizuj kategorię (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: category, error } = await supabase
       .from('categories')
       .update(updateData)
@@ -173,28 +175,28 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
-    const supabase = await createAuthServerClient();
+    const authClient = await createAuthServerClient();
     const { id } = await context.params;
 
     // Auth check
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user } } = await authClient.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[Categories API] Unauthorized delete by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
       );
     }
 
-    // Usuń kategorię
+    // Usuń kategorię (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { error } = await supabase
       .from('categories')
       .delete()

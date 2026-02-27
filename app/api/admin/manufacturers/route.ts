@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { Manufacturer, ManufacturerFormData } from '@/types/manufacturer';
 
@@ -66,8 +67,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Auth check
-    const supabase = await createAuthServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const authClient = await createAuthServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
 
     if (!user) {
       return NextResponse.json(
@@ -96,7 +97,8 @@ export async function POST(request: NextRequest) {
 
     const trimmedName = body.name.trim();
 
-    // Insert manufacturer
+    // Insert manufacturer (service role - bypasses RLS)
+    const supabase = createServerClient();
     const { data: newManufacturer, error } = await supabase
       .from('manufacturers')
       .insert([{ name: trimmedName }])
