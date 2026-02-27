@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ShoppingCart, Package, Shield, Truck } from 'lucide-react';
-import { getAllProducts, getProductById, initializeStore } from '@/lib/products-store';
+import { getAllProducts, getProductById } from '@/lib/products-store';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { formatPriceWithCurrency } from '@/lib/format-price';

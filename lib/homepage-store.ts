@@ -9,14 +9,6 @@ import type { HomepageContent, HomepageFormData } from '@/types/homepage';
  */
 
 /**
- * @deprecated initializeHomepageStore is no longer needed (now using Supabase)
- */
-export function initializeHomepageStore(): void {
-  // No-op: localStorage is no longer used
-  console.warn('[DEPRECATED] initializeHomepageStore() is deprecated. Data is now in Supabase.');
-}
-
-/**
  * Get homepage content from Supabase API
  */
 export async function getHomepageContent(): Promise<HomepageContent> {

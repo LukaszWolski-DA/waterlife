@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, Eye, ArrowRight, Flame, Droplets, Zap } from "lucide-react";
-import { getAllProducts, initializeStore } from "@/lib/products-store";
+import { getAllProducts } from "@/lib/products-store";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { formatPriceWithCurrency } from "@/lib/format-price";

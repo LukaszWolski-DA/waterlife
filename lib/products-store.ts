@@ -180,19 +180,3 @@ export async function getCategories(): Promise<string[]> {
 export async function getManufacturers(): Promise<string[]> {
   return await getAllManufacturers();
 }
-
-/**
- * DEPRECATED: initializeStore() - nie jest już potrzebne
- * Dane są teraz w Supabase, nie localStorage
- */
-export function initializeStore(): void {
-  console.warn('⚠️ initializeStore() is deprecated - data is now in Supabase');
-}
-
-/**
- * DEPRECATED: resetStore() - nie jest już potrzebne
- * Dane są teraz w Supabase, nie localStorage
- */
-export function resetStore(): void {
-  console.warn('⚠️ resetStore() is deprecated - data is now in Supabase');
-}
