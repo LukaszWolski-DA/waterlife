@@ -6,6 +6,8 @@ import {
   updateProductServer,
   deleteProductServer,
 } from '@/lib/supabase/products';
+import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { ProductFormData } from '@/types/product';
 
 /**
@@ -71,9 +73,15 @@ export async function GET(request: NextRequest) {
 // POST /api/produkty - Utwórz nowy produkt (ADMIN)
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Sprawdzenie autoryzacji admina
-    // W przyszłości: const session = await getServerSession();
-    // if (!session || !session.user.isAdmin) return 401
+    const supabase = await createAuthServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: UNAUTHORIZED_RESPONSE.error }, { status: UNAUTHORIZED_RESPONSE.status });
+    }
+    if (!isAdminEmail(user.email || '')) {
+      return NextResponse.json({ success: false, error: ADMIN_UNAUTHORIZED_RESPONSE.error }, { status: ADMIN_UNAUTHORIZED_RESPONSE.status });
+    }
 
     const body = await request.json();
 
@@ -121,7 +129,15 @@ export async function POST(request: NextRequest) {
 // PUT /api/produkty - Zaktualizuj produkt (ADMIN)
 export async function PUT(request: NextRequest) {
   try {
-    // TODO: Sprawdzenie autoryzacji admina
+    const supabase = await createAuthServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: UNAUTHORIZED_RESPONSE.error }, { status: UNAUTHORIZED_RESPONSE.status });
+    }
+    if (!isAdminEmail(user.email || '')) {
+      return NextResponse.json({ success: false, error: ADMIN_UNAUTHORIZED_RESPONSE.error }, { status: ADMIN_UNAUTHORIZED_RESPONSE.status });
+    }
 
     const body = await request.json();
     const { id, ...updateData } = body;
@@ -159,7 +175,15 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/produkty - Usuń produkt (ADMIN)
 export async function DELETE(request: NextRequest) {
   try {
-    // TODO: Sprawdzenie autoryzacji admina
+    const supabase = await createAuthServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: UNAUTHORIZED_RESPONSE.error }, { status: UNAUTHORIZED_RESPONSE.status });
+    }
+    if (!isAdminEmail(user.email || '')) {
+      return NextResponse.json({ success: false, error: ADMIN_UNAUTHORIZED_RESPONSE.error }, { status: ADMIN_UNAUTHORIZED_RESPONSE.status });
+    }
 
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
