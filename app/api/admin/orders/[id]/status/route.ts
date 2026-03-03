@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { OrderStatus } from '@/types/order';
+import { isAdminEmail, UNAUTHORIZED_RESPONSE, ADMIN_UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 
 /**
  * API endpoint dla zmiany statusu zamówienia (Admin)
@@ -19,21 +20,20 @@ export async function PATCH(
     const { id } = await context.params;
     const supabase = await createAuthServerClient();
 
-    // Sprawdź sesję użytkownika (TODO: dodać sprawdzenie czy to admin)
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Sprawdź sesję i uprawnienia admina
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - musisz być zalogowany jako admin' },
-        { status: 401 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: UNAUTHORIZED_RESPONSE.error }, { status: 401 });
+    }
+
+    if (!isAdminEmail(user.email || '')) {
+      return NextResponse.json({ error: ADMIN_UNAUTHORIZED_RESPONSE.error }, { status: 403 });
     }
 
     // Pobierz nowy status z body
     const body = await request.json();
     const { status } = body;
-
-    console.log('📦 Otrzymany request zmiany statusu:', { orderId: id, status, bodyType: typeof status });
 
     // Walidacja statusu
     const validStatuses: string[] = [
@@ -89,8 +89,6 @@ export async function PATCH(
         { status: 500 }
       );
     }
-
-    console.log(`✅ Order ${id} status changed: ${existingOrder.status} → ${status}`);
 
     return NextResponse.json({
       success: true,

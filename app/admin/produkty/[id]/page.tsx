@@ -53,7 +53,7 @@ export default function EditProductPage() {
   if (notFound) {
     return (
       <div className="p-8">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-4xl">
           <div className="rounded-lg border border-destructive bg-destructive/10 p-8 text-center">
             <h2 className="mb-2 text-2xl font-bold">Produkt nie znaleziony</h2>
             <p className="mb-6 text-muted-foreground">
@@ -73,7 +73,7 @@ export default function EditProductPage() {
 
   return (
     <div className="p-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-4xl">
         <Link href="/admin/produkty" className="mb-6 inline-block">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />

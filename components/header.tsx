@@ -68,7 +68,7 @@ export function Header() {
               535-430-854
             </a>
             <a
-              href="#"
+              href="https://www.facebook.com/people/Waterlife-Technika-Grzewcza-i-Systemy-Nawadniaj%C4%85ce/61588447900070/?mibextid=wwXIfr&rdid=0i1vzqeFoIih667q&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1G4U7QH6WD%2F%3Fmibextid%3DwwXIfr"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-primary-foreground/80 transition-colors"
@@ -205,7 +205,7 @@ export function Header() {
                         535-430-854
                       </a>
                       <a
-                        href="#"
+                        href="https://www.facebook.com/people/Waterlife-Technika-Grzewcza-i-Systemy-Nawadniaj%C4%85ce/61588447900070/?mibextid=wwXIfr&rdid=0i1vzqeFoIih667q&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1G4U7QH6WD%2F%3Fmibextid%3DwwXIfr"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"

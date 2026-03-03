@@ -255,7 +255,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={4}
+              rows={8}
               className={errors.description ? 'border-destructive' : ''}
             />
             {errors.description && (
