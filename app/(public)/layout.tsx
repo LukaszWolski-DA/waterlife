@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
+import CookieConsent from '@/components/CookieConsent';
 
 /**
  * Layout dla stron publicznych (widok klienta)
@@ -16,6 +17,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       </main>
       <Footer />
       <Toaster />
+      <CookieConsent />
     </div>
   );
 }

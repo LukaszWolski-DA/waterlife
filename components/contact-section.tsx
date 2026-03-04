@@ -104,6 +104,7 @@ export function ContactSection({ content }: ContactSectionProps) {
       title: "Adres",
       value: content.address,
       href: content.addressLink,
+      wide: true,
     },
     {
       icon: Clock,
@@ -139,7 +140,7 @@ export function ContactSection({ content }: ContactSectionProps) {
               {contactInfo.map((info) => (
                 <Card
                   key={info.title}
-                  className="border-border hover:border-primary/50 transition-colors"
+                  className={`border-border hover:border-primary/50 transition-colors${info.wide ? " sm:col-span-2" : ""}`}
                 >
                   <CardContent className="p-4 flex items-start gap-4">
                     <div className="bg-primary/10 rounded-lg p-2.5">
@@ -251,7 +252,7 @@ export function ContactSection({ content }: ContactSectionProps) {
                   <Textarea
                     id="message"
                     placeholder="Opisz swoje potrzeby..."
-                    rows={4}
+                    rows={10}
                     value={formData.message}
                     onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                     disabled={loading}
@@ -262,6 +263,13 @@ export function ContactSection({ content }: ContactSectionProps) {
                   <Send className="mr-2 h-4 w-4" />
                   {loading ? 'Wysyłanie...' : content.formButtonText}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Wysyłając formularz, akceptujesz naszą{" "}
+                  <a href="/polityka-prywatnosci" className="underline hover:text-foreground transition-colors">
+                    Politykę prywatności
+                  </a>
+                  .
+                </p>
               </form>
             </CardContent>
           </Card>

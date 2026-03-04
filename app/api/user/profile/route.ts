@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 
 /**
  * API endpoint dla profilu użytkownika
@@ -12,16 +13,16 @@ export async function GET(request: NextRequest) {
     const supabase = await createAuthServerClient();
 
     // Sprawdź sesję użytkownika
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (sessionError || !session?.user) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized - musisz być zalogowany' },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // Pobierz profil użytkownika
     const { data: profile, error: profileError } = await supabase
@@ -53,16 +54,16 @@ export async function PATCH(request: NextRequest) {
     const supabase = await createAuthServerClient();
 
     // Sprawdź sesję użytkownika
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (sessionError || !session?.user) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized - musisz być zalogowany' },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // Pobierz dane do aktualizacji
     const body = await request.json();
@@ -110,6 +111,63 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error('Błąd podczas aktualizacji profilu:', error);
+    return NextResponse.json(
+      { error: 'Błąd serwera' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(_request: NextRequest) {
+  try {
+    const authSupabase = await createAuthServerClient();
+
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - musisz być zalogowany' },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
+    const serviceSupabase = createServerClient();
+
+    // Odepnij zamówienia od użytkownika (zachowujemy historię bez danych osobowych)
+    const { error: ordersError } = await serviceSupabase
+      .from('orders')
+      .update({ user_id: null })
+      .eq('user_id', userId);
+
+    if (ordersError) {
+      console.error('Error anonymizing orders:', ordersError);
+    }
+
+    // Usuń pozycje koszyka
+    const { error: cartError } = await serviceSupabase
+      .from('cart_items')
+      .delete()
+      .eq('user_id', userId);
+
+    if (cartError) {
+      console.error('Error deleting cart items:', cartError);
+    }
+
+    // Usuń konto użytkownika (kaskadowo usuwa user_profiles)
+    const { error: deleteError } = await serviceSupabase.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error('Error deleting user:', deleteError);
+      return NextResponse.json(
+        { error: 'Nie udało się usunąć konta' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: 'Konto zostało usunięte' });
+  } catch (error) {
+    console.error('Błąd podczas usuwania konta:', error);
     return NextResponse.json(
       { error: 'Błąd serwera' },
       { status: 500 }

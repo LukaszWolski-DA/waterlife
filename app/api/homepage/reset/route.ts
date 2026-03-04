@@ -96,9 +96,9 @@ export async function POST() {
     const supabase = await createAuthServerClient();
 
     // Sprawdź sesję użytkownika
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (sessionError || !session?.user) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
@@ -106,8 +106,8 @@ export async function POST() {
     }
 
     // Sprawdź czy user jest adminem
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[HOMEPAGE RESET] Unauthorized reset attempt by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
+      console.warn(`[HOMEPAGE RESET] Unauthorized reset attempt by: ${user.email}`);
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }

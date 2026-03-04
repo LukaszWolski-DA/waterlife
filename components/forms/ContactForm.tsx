@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 /**
  * Formularz kontaktowy
@@ -15,9 +17,19 @@ export default function ContactForm() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!consentChecked) {
+      toast({
+        title: 'Wymagana zgoda',
+        description: 'Zaznacz zgodę na przetwarzanie danych osobowych',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -131,6 +143,22 @@ export default function ContactForm() {
         <p className="text-xs text-gray-500 mt-1">
           Dozwolone formaty: JPG, PNG, PDF (max 5MB)
         </p>
+      </div>
+
+      <div className="flex items-start gap-3">
+        <Checkbox
+          id="contact-consent"
+          checked={consentChecked}
+          onCheckedChange={(checked) => setConsentChecked(checked === true)}
+          disabled={loading}
+          className="mt-0.5"
+        />
+        <Label htmlFor="contact-consent" className="text-sm font-normal leading-relaxed cursor-pointer">
+          Wyrażam zgodę na przetwarzanie moich danych osobowych przez Waterlife s.c. w celu udzielenia odpowiedzi na moje zapytanie, zgodnie z{' '}
+          <Link href="/polityka-prywatnosci" className="text-primary underline hover:no-underline" target="_blank">
+            polityką prywatności
+          </Link>. <span className="text-destructive">*</span>
+        </Label>
       </div>
 
       <Button type="submit" size="lg" className="w-full" disabled={loading}>

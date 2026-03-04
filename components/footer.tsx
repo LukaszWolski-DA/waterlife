@@ -14,8 +14,8 @@ const footerLinks: {
   firma: [
     { name: "O nas",                href: "#" },
     { name: "Kontakt",              href: "#contact" },
-    { name: "Regulamin",            href: "#", comingSoon: true },
-    { name: "Polityka prywatności", href: "#", comingSoon: true },
+    { name: "Regulamin",            href: "/regulamin" },
+    { name: "Polityka prywatności", href: "/polityka-prywatnosci" },
   ],
   pomoc: [
     { name: "FAQ",      href: "#", comingSoon: true },

@@ -10,8 +10,19 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, User, Building2, Phone, Mail, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, User, Building2, Phone, Mail, AlertCircle, Trash2 } from 'lucide-react';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -27,6 +38,7 @@ export default function EditProfilePage() {
     nip: '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Redirect jeśli nie zalogowany
   useEffect(() => {
@@ -78,6 +90,31 @@ export default function EditProfilePage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/user/profile', { method: 'DELETE' });
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: 'Konto usunięte',
+          description: 'Twoje konto i dane osobowe zostały usunięte.',
+        });
+        router.push('/');
+      } else {
+        throw new Error(data.error || 'Nie udało się usunąć konta');
+      }
+    } catch (error) {
+      toast({
+        title: 'Błąd',
+        description: error instanceof Error ? error.message : 'Nie udało się usunąć konta',
+        variant: 'destructive',
+      });
+      setIsDeleting(false);
+    }
   };
 
   // Loading state - sprawdzanie autentykacji
@@ -266,6 +303,51 @@ export default function EditProfilePage() {
           </Button>
         </div>
       </form>
+
+      {/* Strefa niebezpieczna */}
+      <Card className="border-destructive/40 mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Strefa niebezpieczna
+          </CardTitle>
+          <CardDescription>
+            Trwałe usunięcie konta i wszystkich powiązanych danych osobowych
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Usunięcie konta jest <strong>nieodwracalne</strong>. Twoje dane osobowe zostaną usunięte zgodnie z RODO (prawo do bycia zapomnianym).
+            Historia zapytań ofertowych zostanie zachowana w formie anonimowej na potrzeby księgowości.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isDeleting}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                {isDeleting ? 'Usuwanie...' : 'Usuń konto'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Czy na pewno chcesz usunąć konto?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Ta operacja jest <strong>nieodwracalna</strong>. Twoje dane osobowe (imię, nazwisko, telefon, dane firmowe) zostaną trwale usunięte.
+                  Nie będziesz mógł się zalogować na to konto.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Usuń konto na zawsze
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }

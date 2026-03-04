@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CartItem from '@/components/koszyk/CartItem';
@@ -14,6 +16,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Send, ArrowLeft } from 'lucide-react';
+
 
 /**
  * Strona koszyka zakupowego
@@ -26,6 +29,7 @@ export default function CartPage() {
   const { profile } = useUserProfile();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -55,6 +59,10 @@ export default function CartPage() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+
+    if (!consentChecked) {
+      newErrors.consent = 'Zgoda na przetwarzanie danych jest wymagana';
+    }
 
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'Imię jest wymagane';
@@ -307,6 +315,25 @@ export default function CartPage() {
                     rows={4}
                   />
                 </div>
+
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="cart-consent"
+                    checked={consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    disabled={isSubmitting}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="cart-consent" className="text-sm font-normal leading-relaxed cursor-pointer">
+                    Wyrażam zgodę na przetwarzanie moich danych osobowych przez Waterlife s.c. w celu obsługi zapytania ofertowego, zgodnie z{' '}
+                    <Link href="/polityka-prywatnosci" className="text-primary underline hover:no-underline" target="_blank">
+                      polityką prywatności
+                    </Link>. <span className="text-destructive">*</span>
+                  </Label>
+                </div>
+                {errors.consent && (
+                  <p className="text-sm text-destructive">{errors.consent}</p>
+                )}
 
                 <Button
                   type="submit"

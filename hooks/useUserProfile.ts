@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserProfile, UpdateUserProfileRequest } from '@/types/user';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseUserProfileReturn {
   profile: UserProfile | null;
@@ -13,6 +14,7 @@ interface UseUserProfileReturn {
  * Hook do zarządzania profilem użytkownika
  */
 export function useUserProfile(): UseUserProfileReturn {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,8 +45,13 @@ export function useUserProfile(): UseUserProfileReturn {
   }, []);
 
   useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    if (!authLoading && isAuthenticated) {
+      fetchProfile();
+    } else if (!authLoading && !isAuthenticated) {
+      setIsLoading(false);
+      setProfile(null);
+    }
+  }, [authLoading, isAuthenticated, fetchProfile]);
 
   const updateProfile = useCallback(async (data: UpdateUserProfileRequest): Promise<boolean> => {
     try {

@@ -11,18 +11,18 @@ export async function GET() {
     const supabase = await createAuthServerClient();
     
     // Sprawdź autoryzację
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session?.user) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
       return NextResponse.json(
         { error: UNAUTHORIZED_RESPONSE.error },
         { status: UNAUTHORIZED_RESPONSE.status }
       );
     }
-    
+
     // Sprawdź czy user jest adminem
-    if (!isAdminEmail(session.user.email)) {
-      console.warn(`[Dashboard] Unauthorized access attempt by: ${session.user.email}`);
+    if (!isAdminEmail(user.email)) {
+      console.warn(`[Dashboard] Unauthorized access attempt by: ${user.email}`);
       return NextResponse.json(
         { error: ADMIN_UNAUTHORIZED_RESPONSE.error },
         { status: ADMIN_UNAUTHORIZED_RESPONSE.status }
