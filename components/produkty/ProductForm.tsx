@@ -7,7 +7,7 @@ import { getAllManufacturers } from '@/lib/supabase/metadata';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import {
@@ -249,14 +249,11 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           </div>
 
           <div>
-            <Label htmlFor="description">Opis</Label>
-            <Textarea
-              id="description"
-              name="description"
+            <Label>Opis</Label>
+            <RichTextEditor
               value={formData.description}
-              onChange={handleChange}
-              rows={8}
-              className={errors.description ? 'border-destructive' : ''}
+              onChange={(html) => setFormData(prev => ({ ...prev, description: html }))}
+              hasError={!!errors.description}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-destructive">{errors.description}</p>

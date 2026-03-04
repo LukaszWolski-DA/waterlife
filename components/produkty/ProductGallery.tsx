@@ -53,7 +53,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             src={images[selectedIndex].url}
             alt={productName}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
           />
         ) : (
@@ -85,7 +85,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   src={image.url}
                   alt={`${productName} - miniatura ${index + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-[8px]">

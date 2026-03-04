@@ -83,7 +83,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
         {product.description && (
           <p className="text-sm text-gray-600 line-clamp-2">
-            {product.description}
+            {product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
           </p>
         )}
       </CardContent>

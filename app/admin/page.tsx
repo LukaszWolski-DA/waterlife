@@ -6,8 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
 
-// Cache na 1 minutę
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface DashboardStats {
   totalOrders: number;

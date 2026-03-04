@@ -1,5 +1,5 @@
 import type { HomepageContent } from '@/types/homepage';
-import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { createServerClient } from '@/lib/supabase/server';
 
 /**
  * Server-side only functions for homepage content
@@ -99,7 +99,7 @@ const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
  */
 export async function getHomepageContentServer(): Promise<HomepageContent> {
   try {
-    const supabase = await createAuthServerClient();
+    const supabase = createServerClient();
 
     const { data, error } = await supabase
       .from('homepage_content')

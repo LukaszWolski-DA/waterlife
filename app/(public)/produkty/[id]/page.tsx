@@ -1,14 +1,13 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, Package, Shield, Truck } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Package } from 'lucide-react';
 import { getAllProducts, getProductById } from '@/lib/products-store';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
@@ -156,59 +155,21 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             {product.stock > 0 ? 'Dodaj do koszyka' : 'Brak w magazynie'}
           </Button>
 
-          {/* Dodatkowe informacje */}
-          <div className="grid grid-cols-1 gap-4">
-            <Card>
-              <CardContent className="flex items-start gap-3 p-4">
-                <Truck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Szybka dostawa</p>
-                  <p className="text-sm text-muted-foreground">
-                    Realizacja zamówienia w 24h
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-start gap-3 p-4">
-                <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Gwarancja producenta</p>
-                  <p className="text-sm text-muted-foreground">
-                    Oryginalny produkt z pełną gwarancją
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Opis produktu */}
+          {product.description && (
+            <div>
+              <hr className="mb-4" />
+              <h2 className="text-lg font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                Opis produktu
+              </h2>
+              <div
+                className="prose prose-sm max-w-none text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Opis produktu — pełna szerokość */}
-      {product.description && (
-        <div className="mb-16">
-          <h2 className="text-xl font-semibold mb-4">Opis produktu</h2>
-          <div className="text-muted-foreground">
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => <h1 className="text-2xl font-bold mb-3">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-xl font-semibold mb-2">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-lg font-medium mb-2">{children}</h3>,
-                p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
-                li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-primary pl-4 italic my-3">{children}</blockquote>
-                ),
-              }}
-            >
-              {product.description}
-            </ReactMarkdown>
-          </div>
-        </div>
-      )}
 
       {/* Powiązane produkty */}
       {relatedProducts.length > 0 && (

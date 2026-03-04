@@ -24,13 +24,20 @@ export function ImageLightbox({
   onOpenChange,
 }: ImageLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [zoomed, setZoomed] = useState(false);
 
   // Reset do indeksu startowego gdy otwieramy
   useEffect(() => {
     if (open) {
       setCurrentIndex(initialIndex);
+      setZoomed(false);
     }
   }, [open, initialIndex]);
+
+  // Reset zoom przy zmianie zdjęcia
+  useEffect(() => {
+    setZoomed(false);
+  }, [currentIndex]);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -59,7 +66,17 @@ export function ImageLightbox({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-[90vw] w-full p-0 bg-black/95 border-none"
+        className="w-full p-0 bg-black/95 border-none"
+        style={
+          zoomed
+            ? {
+                maxWidth: '100vw',
+                width: '100vw',
+                height: '100vh',
+                borderRadius: 0,
+              }
+            : { maxWidth: '90vw' }
+        }
         showCloseButton={false}
       >
         {/* Ukryty tytul dla screen readerow */}
@@ -67,18 +84,24 @@ export function ImageLightbox({
           Podglad zdjecia {currentIndex + 1} z {images.length}
         </DialogTitle>
 
-        {/* Przycisk zamkniecia */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
-          onClick={() => onOpenChange(false)}
-        >
-          <X className="h-6 w-6" />
-        </Button>
+        {/* Przycisk zamknij */}
+        <div className="absolute top-4 right-4 z-50">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20"
+            onClick={() => onOpenChange(false)}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
 
         {/* Glowne zdjecie */}
-        <div className="relative w-full h-[85vh]">
+        <div
+          className={`relative w-full overflow-hidden ${zoomed ? 'h-screen' : 'h-[85vh]'}`}
+          style={{ cursor: zoomed ? 'zoom-out' : 'zoom-in' }}
+          onClick={() => setZoomed(z => !z)}
+        >
           {images[currentIndex] ? (
             <Image
               src={images[currentIndex]}
@@ -101,7 +124,7 @@ export function ImageLightbox({
               variant="ghost"
               size="icon"
               className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
-              onClick={goToPrevious}
+              onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
             >
               <ChevronLeft className="h-8 w-8" />
             </Button>
@@ -109,7 +132,7 @@ export function ImageLightbox({
               variant="ghost"
               size="icon"
               className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
-              onClick={goToNext}
+              onClick={(e) => { e.stopPropagation(); goToNext(); }}
             >
               <ChevronRight className="h-8 w-8" />
             </Button>

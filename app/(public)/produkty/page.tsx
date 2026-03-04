@@ -16,10 +16,13 @@ import { SlidersHorizontal } from 'lucide-react';
 function ProductsContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
+  const initialCategories = searchParams.get('categories')
+    ? searchParams.get('categories')!.split(',').map(c => c.trim())
+    : [];
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
-    <ProductFiltersProvider initialSearchQuery={initialSearch}>
+    <ProductFiltersProvider initialSearchQuery={initialSearch} initialCategories={initialCategories}>
       <div className="container mx-auto px-4 py-8">
         {/* Heading with Search Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

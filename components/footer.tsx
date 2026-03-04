@@ -1,24 +1,27 @@
 import Link from "next/link";
 import { Droplets, Mail, Phone } from "lucide-react";
 
-const footerLinks = {
+const footerLinks: {
+  produkty: { name: string; href: string }[];
+  firma: { name: string; href: string; comingSoon?: boolean }[];
+  pomoc: { name: string; href: string; comingSoon?: boolean }[];
+} = {
   produkty: [
-    { name: "Kotły gazowe", href: "#" },
-    { name: "Podgrzewacze wody", href: "#" },
-    { name: "Nagrzewnice", href: "#" },
-    { name: "Elektrozawory", href: "#" },
+    { name: "Nawadnianie",       href: "/produkty?categories=Nawadnianie" },
+    { name: "Technika grzewcza", href: "/produkty?categories=Technika%20Grzewcza" },
+    { name: "Systemy sanitarne", href: "/produkty?categories=Systemy%20Sanitarne" },
   ],
   firma: [
-    { name: "O nas", href: "#" },
-    { name: "Kontakt", href: "#contact" },
-    { name: "Regulamin", href: "#" },
-    { name: "Polityka prywatności", href: "#" },
+    { name: "O nas",                href: "#" },
+    { name: "Kontakt",              href: "#contact" },
+    { name: "Regulamin",            href: "#", comingSoon: true },
+    { name: "Polityka prywatności", href: "#", comingSoon: true },
   ],
   pomoc: [
-    { name: "FAQ", href: "#" },
-    { name: "Dostawa", href: "#" },
-    { name: "Zwroty", href: "#" },
-    { name: "Gwarancja", href: "#" },
+    { name: "FAQ",      href: "#", comingSoon: true },
+    { name: "Dostawa",  href: "#", comingSoon: true },
+    { name: "Zwroty",   href: "#", comingSoon: true },
+    { name: "Gwarancja",href: "#", comingSoon: true },
   ],
 };
 
@@ -69,7 +72,11 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors"
+                    className={`text-sm transition-colors ${
+                      link.comingSoon
+                        ? "text-red-400 hover:text-red-300 cursor-not-allowed"
+                        : "text-primary-foreground/60 hover:text-primary-foreground"
+                    }`}
                   >
                     {link.name}
                   </Link>
@@ -86,7 +93,11 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors"
+                    className={`text-sm transition-colors ${
+                      link.comingSoon
+                        ? "text-red-400 hover:text-red-300 cursor-not-allowed"
+                        : "text-primary-foreground/60 hover:text-primary-foreground"
+                    }`}
                   >
                     {link.name}
                   </Link>

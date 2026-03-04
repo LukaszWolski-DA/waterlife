@@ -32,11 +32,12 @@ const ProductFiltersContext = createContext<ProductFiltersContextType | undefine
 interface ProductFiltersProviderProps {
   children: ReactNode;
   initialSearchQuery?: string;
+  initialCategories?: string[];
 }
 
-export function ProductFiltersProvider({ children, initialSearchQuery = '' }: ProductFiltersProviderProps) {
+export function ProductFiltersProvider({ children, initialSearchQuery = '', initialCategories = [] }: ProductFiltersProviderProps) {
   const [filters, setFilters] = useState<ProductFiltersState>({
-    categories: [],
+    categories: initialCategories,
     manufacturers: [],
     minPrice: null,
     maxPrice: null,
