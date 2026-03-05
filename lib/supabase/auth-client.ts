@@ -24,6 +24,7 @@ export async function registerUser(data: RegisterData) {
       data: {
         full_name: data.full_name,
       },
+      emailRedirectTo: `${window.location.origin}/auth/confirm`,
     },
   });
 
