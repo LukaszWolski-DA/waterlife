@@ -41,7 +41,19 @@ const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string
   }
 };
 
-export function Header() {
+interface HeaderProps {
+  phone?: string;
+  phoneLink?: string;
+  email?: string;
+  emailLink?: string;
+}
+
+export function Header({
+  phone = '535-430-854',
+  phoneLink = 'tel:+48535430854',
+  email = 'biuro@waterlife.net.pl',
+  emailLink = 'mailto:biuro@waterlife.net.pl',
+}: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
   const pathname = usePathname();
@@ -54,18 +66,18 @@ export function Header() {
         <div className="container mx-auto px-4 py-2 flex items-center justify-between text-sm">
           <div className="flex items-center gap-6">
             <a
-              href="mailto:biuro@waterlife.net.pl"
+              href={emailLink}
               className="flex items-center gap-2 hover:text-primary-foreground/80 transition-colors"
             >
               <Mail className="h-4 w-4" />
-              biuro@waterlife.net.pl
+              {email}
             </a>
             <a
-              href="tel:+48535430854"
+              href={phoneLink}
               className="flex items-center gap-2 hover:text-primary-foreground/80 transition-colors"
             >
               <Phone className="h-4 w-4" />
-              535-430-854
+              {phone}
             </a>
             <a
               href="https://www.facebook.com/people/Waterlife-Technika-Grzewcza-i-Systemy-Nawadniaj%C4%85ce/61588447900070/?mibextid=wwXIfr&rdid=0i1vzqeFoIih667q&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1G4U7QH6WD%2F%3Fmibextid%3DwwXIfr"
@@ -81,7 +93,7 @@ export function Header() {
             </a>
           </div>
           <p className="text-primary-foreground/70">
-            Profesjonalne rozwiązania dla Twojego domu
+            Profesjonalne rozwiązania instalacyjne oraz nawodnieniowe
           </p>
         </div>
       </div>
@@ -191,18 +203,18 @@ export function Header() {
                   <div className="border-t pt-4 mt-4">
                     <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                       <a
-                        href="mailto:biuro@waterlife.net.pl"
+                        href={emailLink}
                         className="flex items-center gap-2"
                       >
                         <Mail className="h-4 w-4" />
-                        biuro@waterlife.net.pl
+                        {email}
                       </a>
                       <a
-                        href="tel:+48535430854"
+                        href={phoneLink}
                         className="flex items-center gap-2"
                       >
                         <Phone className="h-4 w-4" />
-                        535-430-854
+                        {phone}
                       </a>
                       <a
                         href="https://www.facebook.com/people/Waterlife-Technika-Grzewcza-i-Systemy-Nawadniaj%C4%85ce/61588447900070/?mibextid=wwXIfr&rdid=0i1vzqeFoIih667q&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1G4U7QH6WD%2F%3Fmibextid%3DwwXIfr"

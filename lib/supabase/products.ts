@@ -200,7 +200,6 @@ export async function createProductServer(data: ProductFormData): Promise<Produc
     throw new Error(`Failed to create product: ${error.message}`);
   }
 
-  console.log('✅ Created product in Supabase:', created.name);
   return mapDbToProduct(created);
 }
 
@@ -256,7 +255,6 @@ export async function updateProductServer(
     throw new Error(`Failed to update product: ${error.message}`);
   }
 
-  console.log('✅ Updated product in Supabase:', updated.name);
   return mapDbToProduct(updated);
 }
 
@@ -273,7 +271,6 @@ export async function deleteProductServer(id: string): Promise<boolean> {
     throw new Error(`Failed to delete product: ${error.message}`);
   }
 
-  console.log('🗑️ Deleted product from Supabase:', id);
   return true;
 }
 
@@ -370,7 +367,6 @@ export async function uploadProductImage(
       data: { publicUrl },
     } = supabase.storage.from('product-images').getPublicUrl(data.path);
 
-    console.log('✅ Uploaded image:', publicUrl);
     return publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
@@ -402,7 +398,6 @@ export async function deleteProductImageServer(imageUrl: string): Promise<boolea
       return false;
     }
 
-    console.log('🗑️ Deleted image:', filePath);
     return true;
   } catch (error) {
     console.error('Error deleting image:', error);

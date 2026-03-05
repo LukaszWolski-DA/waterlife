@@ -406,9 +406,6 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
       html: emailHTML,
     });
 
-    console.log('✅ Email do klienta wysłany pomyślnie:', result.id);
-    console.log('   → Odbiorca:', recipientEmail);
-    
     return { success: true, id: result.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki emaila do klienta:', error);
@@ -545,9 +542,6 @@ export async function sendOfficeOrderNotificationEmail(data: OrderEmailData) {
       html: emailHTML,
     });
 
-    console.log('✅ Email do biura wysłany pomyślnie:', result.id);
-    console.log('   → Odbiorca:', recipientEmail);
-    
     return { success: true, id: result.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki emaila do biura:', error);
@@ -660,9 +654,6 @@ ${message}
       replyTo: customerEmail, // Ważne - admin może odpowiedzieć bezpośrednio
     });
 
-    console.log('✅ Email powiadomienia o kontakcie wysłany:', result.id);
-    console.log('   → Odbiorca:', recipientEmail);
-    
     return { success: true, id: result.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki powiadomienia o kontakcie:', error);

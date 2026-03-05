@@ -38,7 +38,6 @@ export default function ResetPasswordConfirmPage() {
         return;
       }
       
-      console.log('Session valid, user can reset password');
       setIsCheckingSession(false);
     };
 

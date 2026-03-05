@@ -9,7 +9,7 @@ export default function Regulamin() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2">Regulamin serwisu</h1>
-      <p className="text-muted-foreground mb-8">Ostatnia aktualizacja: [DO UZUPEŁNIENIA]</p>
+      <p className="text-muted-foreground mb-8">Ostatnia aktualizacja: 5 marca 2026</p>
 
       <div className="prose prose-gray max-w-none space-y-8">
 
@@ -20,7 +20,7 @@ export default function Regulamin() {
               Niniejszy regulamin określa zasady korzystania z serwisu internetowego dostępnego pod adresem <strong>waterlife.net.pl</strong> (dalej: &quot;Serwis&quot;).
             </li>
             <li>
-              Właścicielem i operatorem Serwisu jest <strong>Waterlife s.c.</strong> z siedzibą pod adresem: <strong>[DO UZUPEŁNIENIA]</strong>, NIP: <strong>[DO UZUPEŁNIENIA]</strong> (dalej: &quot;Sprzedawca&quot;).
+              Właścicielem i operatorem Serwisu jest <strong>Waterlife s.c.</strong> z siedzibą pod adresem: <strong>ul. Pęgowska 1, 55-120 Oborniki Śląskie, woj. dolnośląskie</strong>, NIP: <strong>9151800128</strong> (dalej: &quot;Sprzedawca&quot;).
             </li>
             <li>
               Serwis służy do prezentacji oferty produktowej oraz przyjmowania zapytań ofertowych. Nie stanowi sklepu internetowego w rozumieniu przepisów o prawach konsumenta — złożenie zapytania ofertowego nie jest równoznaczne z zawarciem umowy sprzedaży.
@@ -64,7 +64,37 @@ export default function Regulamin() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-3">§5. Zasady korzystania z Serwisu</h2>
+          <h2 className="text-xl font-semibold mb-3">§5. Dostawa</h2>
+          <ol className="list-decimal pl-6 space-y-2">
+            <li>Wszystkie oferowane produkty są nowe i nieużywane.</li>
+            <li>Towar wysyłany jest przeważnie w ciągu 48 godzin roboczych (poniedziałek–piątek) od potwierdzenia zamówienia. W okresach świątecznych oraz od kwietnia do sierpnia termin realizacji może ulec wydłużeniu.</li>
+            <li>Wysyłka realizowana jest za pośrednictwem firmy kurierskiej, spedycyjnej lub do paczkomatu.</li>
+            <li>Maksymalna waga jednej paczki wynosi 31,5 kg dla przesyłki kurierskiej oraz 20 kg dla paczkomatu. Towar przekraczający te limity pakowany jest do dodatkowych paczek, których koszt pokrywa Kupujący — ustalany indywidualnie.</li>
+            <li>W przypadku zamówienia kilku pozycji o różnych kosztach dostawy, których łączna waga nie przekracza 31,5 kg i które wysyłane są w jednej paczce, obowiązuje najwyższy spośród podanych kosztów transportu.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-3">§6. Zwroty i odstąpienie od umowy</h2>
+          <ol className="list-decimal pl-6 space-y-2">
+            <li>Zgodnie z art. 27 ustawy z dnia 30 maja 2014 r. o prawach konsumenta, konsument, który zawarł umowę na odległość, może w terminie 14 dni odstąpić od niej bez podawania przyczyny.</li>
+            <li>Zwrot towaru odbywa się na koszt Kupującego. Towar musi być nieużywany i fabrycznie zapakowany, w stanie takim, w jakim został dostarczony.</li>
+            <li>Jeżeli Sprzedawca po sprawdzeniu zwrotu stwierdzi, że towar był używany lub otwierany, ma prawo do nieprzyjęcia zwrotu i odesłania go na koszt Kupującego.</li>
+            <li>Reklamacje i zwroty rozpatrywane są w terminie do 14 dni roboczych od ich otrzymania.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-3">§7. Gwarancja i reklamacje</h2>
+          <ol className="list-decimal pl-6 space-y-2">
+            <li>Jeżeli producent nie wystawia kart gwarancyjnych, podstawą gwarancji jest dowód zakupu (paragon lub faktura VAT).</li>
+            <li>Reklamacje należy kierować na adres e-mail: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub telefonicznie: 535-430-854.</li>
+            <li>Obsługa klienta dostępna jest w godzinach: poniedziałek–piątek 9:00–15:00.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-3">§8. Zasady korzystania z Serwisu</h2>
           <ol className="list-decimal pl-6 space-y-2">
             <li>Użytkownik zobowiązuje się do korzystania z Serwisu zgodnie z obowiązującym prawem, postanowieniami niniejszego Regulaminu oraz dobrymi obyczajami.</li>
             <li>Zabrania się podawania fałszywych danych osobowych lub danych osób trzecich bez ich zgody.</li>
@@ -74,7 +104,7 @@ export default function Regulamin() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-3">§6. Ochrona danych osobowych</h2>
+          <h2 className="text-xl font-semibold mb-3">§9. Ochrona danych osobowych</h2>
           <p>
             Zasady przetwarzania danych osobowych opisane są szczegółowo w{' '}
             <a href="/polityka-prywatnosci" className="text-primary underline">Polityce prywatności</a>.
@@ -82,7 +112,7 @@ export default function Regulamin() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-3">§7. Odpowiedzialność</h2>
+          <h2 className="text-xl font-semibold mb-3">§10. Odpowiedzialność</h2>
           <ol className="list-decimal pl-6 space-y-2">
             <li>Sprzedawca dokłada wszelkich starań, aby informacje zawarte w Serwisie były aktualne i prawidłowe, jednak nie ponosi odpowiedzialności za błędy lub nieaktualność danych.</li>
             <li>Sprzedawca nie ponosi odpowiedzialności za przerwy w dostępie do Serwisu spowodowane czynnikami zewnętrznymi lub pracami technicznymi.</li>
@@ -91,7 +121,7 @@ export default function Regulamin() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-3">§8. Postanowienia końcowe</h2>
+          <h2 className="text-xl font-semibold mb-3">§11. Postanowienia końcowe</h2>
           <ol className="list-decimal pl-6 space-y-2">
             <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego, w szczególności Kodeksu cywilnego.</li>
             <li>Sprzedawca zastrzega sobie prawo do zmiany Regulaminu. O istotnych zmianach Użytkownicy posiadający konto zostaną poinformowani drogą e-mailową.</li>

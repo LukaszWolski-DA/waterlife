@@ -12,20 +12,32 @@ const footerLinks: {
     { name: "Systemy sanitarne", href: "/produkty?categories=Systemy%20Sanitarne" },
   ],
   firma: [
-    { name: "O nas",                href: "#" },
-    { name: "Kontakt",              href: "#contact" },
+    { name: "O nas",                href: "/#" },
+    { name: "Kontakt",              href: "/#contact" },
     { name: "Regulamin",            href: "/regulamin" },
     { name: "Polityka prywatności", href: "/polityka-prywatnosci" },
   ],
   pomoc: [
-    { name: "FAQ",      href: "#", comingSoon: true },
-    { name: "Dostawa",  href: "#", comingSoon: true },
-    { name: "Zwroty",   href: "#", comingSoon: true },
-    { name: "Gwarancja",href: "#", comingSoon: true },
+    { name: "FAQ",      href: "/faq" },
+    { name: "Dostawa",  href: "/dostawa" },
+    { name: "Zwroty",   href: "/zwroty" },
+    { name: "Gwarancja",href: "/gwarancja" },
   ],
 };
 
-export function Footer() {
+interface FooterProps {
+  phone?: string;
+  phoneLink?: string;
+  email?: string;
+  emailLink?: string;
+}
+
+export function Footer({
+  phone = '535-430-854',
+  phoneLink = 'tel:+48535430854',
+  email = 'biuro@waterlife.net.pl',
+  emailLink = 'mailto:biuro@waterlife.net.pl',
+}: FooterProps) {
   return (
     <footer className="bg-foreground text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -117,19 +129,19 @@ export function Footer() {
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-primary-foreground/60">
             <a
-              href="mailto:biuro@waterlife.net.pl"
+              href={emailLink}
               className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
             >
               <Mail className="h-3.5 w-3.5 sm:hidden" />
-              biuro@waterlife.net.pl
+              {email}
             </a>
             <span className="hidden sm:inline" aria-hidden="true">•</span>
             <a
-              href="tel:+48535430854"
+              href={phoneLink}
               className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
             >
               <Phone className="h-3.5 w-3.5 sm:hidden" />
-              tel. 535-430-854
+              tel. {phone}
             </a>
           </div>
         </div>

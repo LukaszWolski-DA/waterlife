@@ -9,7 +9,7 @@ export default function PolitykaPrywatnosci() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2">Polityka prywatności</h1>
-      <p className="text-muted-foreground mb-8">Ostatnia aktualizacja: [DO UZUPEŁNIENIA]</p>
+      <p className="text-muted-foreground mb-8">Ostatnia aktualizacja: 5 marca 2026</p>
 
       <div className="prose prose-gray max-w-none space-y-8">
 
@@ -17,8 +17,8 @@ export default function PolitykaPrywatnosci() {
           <h2 className="text-xl font-semibold mb-3">1. Administrator danych osobowych</h2>
           <p>
             Administratorem Twoich danych osobowych jest <strong>Waterlife s.c.</strong>,
-            z siedzibą pod adresem: <strong>[DO UZUPEŁNIENIA — ulica, kod pocztowy, miasto]</strong>,
-            NIP: <strong>[DO UZUPEŁNIENIA]</strong>, REGON: <strong>[DO UZUPEŁNIENIA]</strong>.
+            z siedzibą pod adresem: <strong>ul. Pęgowska 1, 55-120 Oborniki Śląskie, woj. dolnośląskie</strong>,
+            NIP: <strong>9151800128</strong>, REGON: <strong>365904380</strong>.
           </p>
           <p className="mt-2">
             Kontakt z administratorem: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub tel. 535-430-854.

@@ -40,11 +40,6 @@ export default function CartSummary({ total, deliveryCost = 0 }: CartSummaryProp
           <span className="text-blue-600">{formatPrice(finalTotal)} PLN</span>
         </div>
 
-        {deliveryCost === 0 && total > 0 && (
-          <p className="text-xs text-green-600 text-center">
-            Darmowa dostawa od 0 PLN
-          </p>
-        )}
       </CardContent>
     </Card>
   );

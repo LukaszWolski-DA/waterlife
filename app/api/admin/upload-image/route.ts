@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { createAuthServerClient } from '@/lib/supabase/server-auth';
+import { isAdminEmail, ADMIN_UNAUTHORIZED_RESPONSE, UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 
 /**
  * API endpoint do uploadu obrazów produktów do Supabase Storage
@@ -11,6 +13,11 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 export async function POST(request: NextRequest) {
   try {
+    const authSupabase = createAuthServerClient();
+    const { data: { user } } = await authSupabase.auth.getUser();
+    if (!user) return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 });
+    if (!isAdminEmail(user.email)) return NextResponse.json(ADMIN_UNAUTHORIZED_RESPONSE, { status: 403 });
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const productId = formData.get('productId') as string | null;
@@ -63,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (uploadError) {
       console.error('Supabase upload error:', uploadError);
       return NextResponse.json(
-        { success: false, error: `Upload failed: ${uploadError.message}` },
+        { success: false, error: 'Błąd podczas uploadu pliku' },
         { status: 500 }
       );
     }

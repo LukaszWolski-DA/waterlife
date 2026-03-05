@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Filtruj po stronie serwera
-      filteredOrders = (allOrders || []).filter((order: any) => {
+      filteredOrders = (allOrders || []).filter((order: { id?: string; customer_info?: { fullName?: string; email?: string } }) => {
         const fullName = order.customer_info?.fullName?.toLowerCase() || '';
         const email = order.customer_info?.email?.toLowerCase() || '';
         const orderId = order.id?.toLowerCase() || '';

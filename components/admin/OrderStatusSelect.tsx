@@ -43,34 +43,24 @@ export function OrderStatusSelect({
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (newStatus === localStatus || isUpdating) return;
 
-    console.log('🔄 Zmiana statusu:', { orderId, from: localStatus, to: newStatus });
     setIsUpdating(true);
 
     try {
       let success = false;
 
       if (onStatusChange) {
-        console.log('📞 Wywołanie przez onStatusChange callback', { orderId, newStatus });
         success = await onStatusChange(orderId, newStatus);
       } else {
         // Fallback - bezpośrednie wywołanie API
         const url = `/api/admin/orders/${orderId}/status`;
         const payload = { status: newStatus };
-        
-        console.log('📞 Bezpośrednie wywołanie API:', { url, payload });
-        
+
         const response = await fetch(url, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(payload),
-        });
-
-        console.log('📥 Odpowiedź API:', { 
-          status: response.status, 
-          ok: response.ok,
-          statusText: response.statusText 
         });
 
         if (!response.ok) {

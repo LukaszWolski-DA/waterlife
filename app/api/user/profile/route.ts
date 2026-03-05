@@ -78,7 +78,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Przygotuj dane do aktualizacji
-    const updateData: any = {
+    const updateData: Record<string, string | null> = {
       first_name,
       last_name,
       full_name: `${first_name} ${last_name}`, // Aktualizuj też full_name
