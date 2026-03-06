@@ -166,7 +166,7 @@ export function Header({
                   <span className="sr-only">Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px]">
+              <SheetContent side="right" className="w-4/5 sm:max-w-sm">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
@@ -178,7 +178,7 @@ export function Header({
                   {/* Navigation - tylko na stronie głównej */}
                   {isHomePage && (
                     <nav className="flex flex-col gap-2">
-                      {navigation.map((item) => (
+                      {navigation.filter(item => ['Produkty', 'Kontakt'].includes(item.name)).map((item) => (
                         <a
                           key={item.name}
                           href={item.href}
@@ -195,13 +195,13 @@ export function Header({
                   )}
                   {/* User section */}
                   <div className="border-t pt-4 mt-4">
-                    <p className="text-sm font-medium mb-2">Twoje konto</p>
+                    <p className="px-4 text-sm font-medium mb-2">Twoje konto</p>
                     <UserDropdown />
                   </div>
 
                   {/* Contact section */}
                   <div className="border-t pt-4 mt-4">
-                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    <div className="px-4 flex flex-col gap-2 text-sm text-muted-foreground">
                       <a
                         href={emailLink}
                         className="flex items-center gap-2"

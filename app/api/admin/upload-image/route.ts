@@ -13,7 +13,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 export async function POST(request: NextRequest) {
   try {
-    const authSupabase = createAuthServerClient();
+    const authSupabase = await createAuthServerClient();
     const { data: { user } } = await authSupabase.auth.getUser();
     if (!user) return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 });
     if (!isAdminEmail(user.email)) return NextResponse.json(ADMIN_UNAUTHORIZED_RESPONSE, { status: 403 });

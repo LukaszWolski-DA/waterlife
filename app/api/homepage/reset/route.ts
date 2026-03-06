@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createServerClient } from '@/lib/supabase/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { isAdminEmail, ADMIN_UNAUTHORIZED_RESPONSE, UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
 import type { HomepageContent } from '@/types/homepage';
@@ -114,8 +115,9 @@ export async function POST() {
       );
     }
 
-    // Zaktualizuj w bazie
-    const { data, error } = await supabase
+    // Zaktualizuj w bazie (service role — bypasses RLS)
+    const adminSupabase = createServerClient();
+    const { data, error } = await adminSupabase
       .from('homepage_content')
       .update({
         content: DEFAULT_CONTENT,

@@ -30,18 +30,21 @@ export async function GET() {
     }
     
     // Pobierz statystyki równolegle
-    const [ordersResult, productsResult, revenueResult] = await Promise.all([
+    const [ordersResult, productsResult, revenueResult, newMessagesResult] = await Promise.all([
       // Liczba zamówień
       supabase.from('orders').select('*', { count: 'exact', head: true }),
       // Liczba produktów
       supabase.from('products').select('*', { count: 'exact', head: true }),
       // Suma przychodów
       supabase.from('orders').select('total'),
+      // Nowe wiadomości kontaktowe
+      supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('status', 'new'),
     ]);
-    
+
     const totalOrders = ordersResult.count || 0;
     const totalProducts = productsResult.count || 0;
     const totalRevenue = revenueResult.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
+    const newMessages = newMessagesResult.count || 0;
     
     // Pobierz ostatnie 5 zamówień
     const { data: recentOrders, error: ordersError } = await supabase
@@ -59,7 +62,7 @@ export async function GET() {
         totalOrders,
         totalProducts,
         totalRevenue,
-        newMessages: 0, // TODO: Implementować później gdy będzie tabela contact_messages
+        newMessages,
       },
       recentOrders: recentOrders || [],
     });
