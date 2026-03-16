@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAuthServerClient } from '@/lib/supabase/server-auth';
-import { sendContactNotificationEmail } from '@/lib/email';
+import { createServerClient } from '@/lib/supabase/server';
+import { sendContactNotificationEmail, sendContactConfirmationEmail } from '@/lib/email';
 import type { ContactFormData } from '@/types/contact';
 
 /**
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Zapisz wiadomość do Supabase
-    const supabase = await createAuthServerClient();
+    // Zapisz wiadomość do Supabase (service role — omija RLS)
+    const supabase = createServerClient();
 
     const { data: newMessage, error: dbError } = await supabase
       .from('contact_messages')
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Wyślij email powiadomienie do admina (asynchronicznie, nie czekamy)
+    // Wyślij emaile (niekrytyczne - logujemy błąd ale nie zwracamy 500)
     try {
       await sendContactNotificationEmail({
         messageId: newMessage.id,
@@ -82,8 +82,12 @@ export async function POST(request: NextRequest) {
         subject: subject?.trim(),
         message: message.trim(),
       });
+      await sendContactConfirmationEmail({
+        customerName: name.trim(),
+        customerEmail: email.trim(),
+        subject: subject?.trim(),
+      });
     } catch (emailError) {
-      // Email nie jest krytyczny - logujemy błąd ale nie zwracamy 500
       console.error('Email notification error:', emailError);
     }
 

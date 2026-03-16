@@ -395,9 +395,7 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
   `;
 
   try {
-    // W trybie testowym - wyślij na EMAIL_OFFICE_TEST
-    // W produkcji - wyślij na email klienta
-    const recipientEmail = process.env.EMAIL_OFFICE_TEST || customer.email;
+    const recipientEmail = customer.email;
 
     const result = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'WaterLife <onboarding@resend.dev>',
@@ -406,7 +404,7 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
       html: emailHTML,
     });
 
-    return { success: true, id: result.id };
+    return { success: true, id: result.data?.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki emaila do klienta:', error);
     return { success: false, error };
@@ -542,7 +540,7 @@ export async function sendOfficeOrderNotificationEmail(data: OrderEmailData) {
       html: emailHTML,
     });
 
-    return { success: true, id: result.id };
+    return { success: true, id: result.data?.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki emaila do biura:', error);
     return { success: false, error };
@@ -654,9 +652,167 @@ ${message}
       replyTo: customerEmail, // Ważne - admin może odpowiedzieć bezpośrednio
     });
 
-    return { success: true, id: result.id };
+    return { success: true, id: result.data?.id };
   } catch (error) {
     console.error('❌ Błąd wysyłki powiadomienia o kontakcie:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Wysyła email potwierdzający do klienta po wypełnieniu formularza kontaktowego
+ */
+interface ContactConfirmationData {
+  customerName: string;
+  customerEmail: string;
+  subject?: string;
+}
+
+export async function sendContactConfirmationEmail(data: ContactConfirmationData) {
+  const { customerName, customerEmail, subject } = data;
+
+  const emailHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+          line-height: 1.6;
+          color: #0f172a;
+          background-color: #f8fafc;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+          color: white;
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .header-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.9; }
+        .header h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 0; font-size: 16px; opacity: 0.85; font-weight: 400; }
+        .content { padding: 40px 30px; background: #ffffff; }
+        .info-box {
+          background: #f0f9ff;
+          padding: 24px;
+          border-radius: 12px;
+          margin-bottom: 30px;
+          border: 1px solid #e0f2fe;
+        }
+        .info-box h2 { margin: 0 0 12px 0; color: #0369a1; font-size: 18px; font-weight: 600; }
+        .info-box p { margin: 0; color: #475569; font-size: 15px; line-height: 1.6; }
+        .greeting { margin-bottom: 24px; }
+        .greeting p { margin: 8px 0; font-size: 15px; color: #475569; }
+        .greeting strong { color: #0f172a; }
+        .next-steps {
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+          padding: 24px;
+          border-radius: 12px;
+          margin: 32px 0;
+          border: 1px solid #fde047;
+        }
+        .next-steps h3 { margin: 0 0 12px 0; color: #854d0e; font-size: 17px; font-weight: 600; }
+        .next-steps p { margin: 0; color: #713f12; font-size: 15px; line-height: 1.6; }
+        .contact-section { margin-top: 32px; padding-top: 24px; border-top: 2px solid #e2e8f0; }
+        .contact-section p { margin: 8px 0; font-size: 15px; color: #475569; }
+        .contact-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          background: #f8fafc;
+          border-radius: 8px;
+          font-size: 14px;
+          margin-top: 12px;
+        }
+        .contact-item strong { color: #0f172a; min-width: 80px; }
+        .contact-item a { color: #0369a1; text-decoration: none; }
+        .footer {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+          padding: 32px 30px;
+          text-align: center;
+          color: #cbd5e1;
+        }
+        .footer-brand { margin-bottom: 16px; }
+        .footer-brand strong { color: white; font-size: 20px; font-weight: 700; }
+        .footer-brand-tagline { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+        .footer p { margin: 8px 0; font-size: 13px; opacity: 0.8; }
+        .footer-divider { height: 1px; background: rgba(255, 255, 255, 0.1); margin: 20px 0; }
+        @media only screen and (max-width: 600px) {
+          .header { padding: 30px 20px; }
+          .content { padding: 30px 20px; }
+          .footer { padding: 24px 20px; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="header-icon">💧</div>
+          <h1>Dziękujemy za wiadomość!</h1>
+          <p>Otrzymaliśmy Twoje zapytanie</p>
+        </div>
+
+        <div class="content">
+          <div class="greeting">
+            <p>Cześć <strong>${customerName}</strong>!</p>
+            <p>Potwierdzamy otrzymanie Twojej wiadomości${subject ? ` dotyczącej: <strong>${subject}</strong>` : ''}.</p>
+          </div>
+
+          <div class="info-box">
+            <h2>Potwierdzenie kontaktu</h2>
+            <p>Twoja wiadomość dotarła do nas. Nasz zespół zapozna się z jej treścią i odpowie możliwie jak najszybciej.</p>
+          </div>
+
+          <div class="next-steps">
+            <h3>📋 Co dalej?</h3>
+            <p>Odpowiemy na Twoją wiadomość <strong>w ciągu 24 godzin roboczych</strong>. Jeśli sprawa jest pilna, skontaktuj się z nami bezpośrednio.</p>
+          </div>
+
+          <div class="contact-section">
+            <p>Możesz też skontaktować się z nami bezpośrednio:</p>
+            <div class="contact-item">
+              <strong>Email:</strong>
+              <a href="mailto:biuro@waterlife.net.pl">biuro@waterlife.net.pl</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-brand">
+            <strong>💧 WaterLife</strong>
+            <div class="footer-brand-tagline">Profesjonalne rozwiązania wodne</div>
+          </div>
+          <div class="footer-divider"></div>
+          <p>To jest automatyczna wiadomość potwierdzająca.</p>
+          <p>Prosimy nie odpowiadać na ten email.</p>
+          <p style="margin-top: 16px; font-size: 12px;">© ${new Date().getFullYear()} WaterLife. Wszelkie prawa zastrzeżone.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const result = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'WaterLife <onboarding@resend.dev>',
+      to: customerEmail,
+      subject: `Potwierdzenie wiadomości${subject ? ` - ${subject}` : ''}`,
+      html: emailHTML,
+    });
+
+    return { success: true, id: result.data?.id };
+  } catch (error) {
+    console.error('❌ Błąd wysyłki potwierdzenia kontaktu do klienta:', error);
     return { success: false, error };
   }
 }
