@@ -251,7 +251,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           <div>
             <Label>Opis</Label>
             <RichTextEditor
-              value={formData.description}
+              value={formData.description ?? ''}
               onChange={(html) => setFormData(prev => ({ ...prev, description: html }))}
               hasError={!!errors.description}
             />

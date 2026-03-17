@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Temporarily ignore TS errors for Next.js 16 route handler params type issue
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   // ✅ Enable image optimization with proper config
   images: {
     remotePatterns: [

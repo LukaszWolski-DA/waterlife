@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pl_PL',
-    url: 'http://localhost:3000',
+    url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://waterlife.net.pl',
     siteName: 'Waterlife',
     title: 'Waterlife - Technika Grzewcza i Sanitarna',
     description: 'Profesjonalne systemy grzewcze, sanitarne i nawadniające.',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 
   // Canonical URL
   alternates: {
-    canonical: 'http://localhost:3000',
+    canonical: process.env.NEXT_PUBLIC_APP_URL ?? 'https://waterlife.net.pl',
   },
 
   icons: {

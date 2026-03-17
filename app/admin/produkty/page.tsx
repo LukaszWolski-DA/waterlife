@@ -164,7 +164,6 @@ export default function AdminProductsPage() {
         product.price.toString(),
         product.status || 'active',
         (product.description || '').replace(/\n/g, ' '), // Remove newlines
-        product.keywords?.join('; ') || '',
       ]);
 
       // Escape CSV values (handle commas, quotes, newlines)

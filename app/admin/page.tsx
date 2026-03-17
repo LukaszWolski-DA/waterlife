@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { ORDER_STATUS_LABELS } from '@/types/order';
+import { ORDER_STATUS_LABELS, OrderStatus } from '@/types/order';
 import { formatDistanceToNow } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
@@ -165,7 +165,7 @@ export default async function AdminDashboardPage() {
                         variant="outline" 
                         className={getStatusColor(order.status)}
                       >
-                        {ORDER_STATUS_LABELS[order.status]}
+                        {ORDER_STATUS_LABELS[order.status as OrderStatus]}
                       </Badge>
                     </div>
                     <div className="text-sm font-medium">
