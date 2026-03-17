@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServerClient } from '@/lib/supabase/server';
 import { createAuthServerClient } from '@/lib/supabase/server-auth';
 import { isAdminEmail, ADMIN_UNAUTHORIZED_RESPONSE, UNAUTHORIZED_RESPONSE } from '@/lib/auth/admin';
@@ -134,6 +135,9 @@ export async function POST() {
         { status: 500 }
       );
     }
+
+    // Odśwież cache strony głównej
+    revalidatePath('/');
 
     // Dodaj updatedAt do content
     const content: HomepageContent = {
