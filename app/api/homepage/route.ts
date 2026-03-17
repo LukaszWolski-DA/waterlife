@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating homepage content:', error);
+      console.error('Error updating homepage content:', error.code, error.message, error.details);
       return NextResponse.json(
         { error: 'Nie udało się zaktualizować treści' },
         { status: 500 }
