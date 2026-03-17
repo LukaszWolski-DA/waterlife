@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { sendContactNotificationEmail, sendContactConfirmationEmail } from '@/lib/email';
+import { getHomepageContentServer } from '@/lib/homepage-server';
 import type { ContactFormData } from '@/types/contact';
 
 /**
@@ -72,6 +73,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Pobierz dane kontaktowe firmy z konfiguracji admina
+    let contactPhone: string | undefined;
+    let contactEmail: string | undefined;
+    let companyName: string | undefined;
+    try {
+      const homepageContent = await getHomepageContentServer();
+      contactPhone = homepageContent.contact.phone;
+      contactEmail = homepageContent.contact.email;
+      companyName = homepageContent.hero.companyName;
+    } catch {
+      // Fallback — dane kontaktowe nie są krytyczne dla wysyłki
+    }
+
     // Wyślij emaile (niekrytyczne - logujemy błąd ale nie zwracamy 500)
     try {
       await sendContactNotificationEmail({
@@ -86,6 +100,9 @@ export async function POST(request: NextRequest) {
         customerName: name.trim(),
         customerEmail: email.trim(),
         subject: subject?.trim(),
+        companyName,
+        contactPhone,
+        contactEmail,
       });
     } catch (emailError) {
       console.error('Email notification error:', emailError);
