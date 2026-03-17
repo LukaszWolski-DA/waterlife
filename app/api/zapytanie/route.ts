@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { 
-  sendCustomerOrderConfirmationEmail, 
-  sendOfficeOrderNotificationEmail 
+import { getHomepageContentServer } from '@/lib/homepage-server';
+import {
+  sendCustomerOrderConfirmationEmail,
+  sendOfficeOrderNotificationEmail
 } from '@/lib/email';
 
 /**
@@ -99,6 +100,19 @@ export async function POST(request: NextRequest) {
       throw new Error('Nie udało się zapisać zamówienia');
     }
 
+    // Pobierz dane kontaktowe firmy z konfiguracji admina
+    let contactPhone: string | undefined;
+    let contactEmail: string | undefined;
+    let companyName: string | undefined;
+    try {
+      const homepageContent = await getHomepageContentServer();
+      contactPhone = homepageContent.contact.phone;
+      contactEmail = homepageContent.contact.email;
+      companyName = homepageContent.hero.companyName;
+    } catch {
+      // Fallback — dane kontaktowe nie są krytyczne dla wysyłki
+    }
+
     // Wysyłka emaili - asynchronicznie (nie blokuje procesu)
     try {
       // Email potwierdzający dla klienta
@@ -116,6 +130,9 @@ export async function POST(request: NextRequest) {
         items: items,
         total: total,
         createdAt: order.created_at,
+        contactPhone,
+        contactEmail,
+        companyName,
       });
 
       // Email powiadomienia dla biura
