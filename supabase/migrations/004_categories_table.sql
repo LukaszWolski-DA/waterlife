@@ -54,25 +54,6 @@ CREATE POLICY "Allow authenticated users to delete categories"
   ON categories FOR DELETE
   USING (auth.role() = 'authenticated');
 
--- Insert initial categories (3 główne kategorie WaterLife)
-INSERT INTO categories (name, description, keywords) VALUES
-  (
-    'Technika Grzewcza',
-    'Kotły gazowe, kondensacyjne, piece CO i akcesoria grzewcze',
-    ARRAY['kotły', 'grzewcze', 'piece', 'ogrzewanie', 'kondensacyjne', 'CO', 'gazowe']
-  ),
-  (
-    'Systemy Sanitarne',
-    'Podgrzewacze wody, bojlery, pompy i instalacje sanitarne',
-    ARRAY['podgrzewacze', 'bojlery', 'woda', 'sanitarne', 'pompy', 'instalacje']
-  ),
-  (
-    'Nawadnianie',
-    'Systemy nawadniania ogrodów, trawników i terenów zielonych',
-    ARRAY['nawadnianie', 'ogród', 'trawnik', 'zraszacze', 'systemy', 'zieleń']
-  )
-ON CONFLICT (name) DO NOTHING;
-
 -- Comment
 COMMENT ON TABLE categories IS 'Kategorie produktów - zarządzane przez panel admina';
 COMMENT ON COLUMN categories.keywords IS 'Słowa kluczowe dla wyszukiwarki (array)';

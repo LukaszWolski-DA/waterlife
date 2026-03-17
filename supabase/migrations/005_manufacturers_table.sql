@@ -49,14 +49,6 @@ CREATE POLICY "Allow authenticated users to delete manufacturers"
   ON manufacturers FOR DELETE
   USING (auth.role() = 'authenticated');
 
--- Insert initial manufacturers (4 główni producenci WaterLife)
-INSERT INTO manufacturers (name) VALUES
-  ('Viessmann'),
-  ('Buderus'),
-  ('Vaillant'),
-  ('Junkers')
-ON CONFLICT (name) DO NOTHING;
-
 -- Comment
 COMMENT ON TABLE manufacturers IS 'Producenci produktów - zarządzane przez panel admina';
 

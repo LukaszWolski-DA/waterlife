@@ -28,6 +28,9 @@ interface OrderEmailData {
   items: OrderItem[];
   total: number;
   createdAt: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  companyName?: string;
 }
 
 /**
@@ -35,8 +38,10 @@ interface OrderEmailData {
  */
 export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
   const { orderId, customer, items, total, createdAt } = data;
+  const contactEmail = data.contactEmail ?? 'biuro@waterlife.net.pl';
+  const contactPhone = data.contactPhone ?? '';
+  const companyName = data.companyName ?? 'Waterlife';
 
-  // Szablon HTML dla klienta - w stylu strony WaterLife
   const emailHTML = `
     <!DOCTYPE html>
     <html>
@@ -45,277 +50,229 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-          line-height: 1.6; 
-          color: #0f172a; 
-          background-color: #f8fafc;
+          line-height: 1.6;
+          color: #0f172a;
+          background-color: #f1f5f9;
         }
-        .container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background: #ffffff;
-          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Header - w stylu hero section */
-        .header { 
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-          color: white; 
-          padding: 40px 30px;
-          text-align: center;
-          position: relative;
-        }
-        .header-icon {
-          font-size: 48px;
-          margin-bottom: 15px;
-          opacity: 0.9;
-        }
-        .header h1 { 
-          margin: 0 0 10px 0; 
-          font-size: 28px;
-          font-weight: 700;
-          letter-spacing: -0.5px;
-        }
-        .header p { 
-          margin: 0;
-          font-size: 16px; 
-          opacity: 0.85;
-          font-weight: 400;
-        }
-        
-        /* Content area */
-        .content { 
-          padding: 40px 30px;
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
           background: #ffffff;
         }
-        
-        /* Order info box */
-        .order-info { 
-          background: #f0f9ff;
-          padding: 24px;
-          border-radius: 12px;
-          margin-bottom: 30px;
-          border: 1px solid #e0f2fe;
+
+        /* Header */
+        .header {
+          background: #334155;
+          padding: 20px 28px;
         }
-        .order-info h2 { 
-          margin: 0 0 16px 0;
-          color: #0369a1;
+        .header-logo-mark {
+          display: inline-block;
+          background: #1e40af;
+          border-radius: 6px;
+          padding: 4px 9px;
+          font-size: 13px;
+          font-weight: 800;
+          color: #ffffff;
+          letter-spacing: 0.5px;
+          vertical-align: middle;
+        }
+        .header-logo-name {
           font-size: 18px;
-          font-weight: 600;
+          font-weight: 700;
+          color: #ffffff;
+          vertical-align: middle;
+          margin-left: 9px;
         }
-        .order-info-row {
+        .header-logo-tagline {
+          font-size: 12px;
+          color: #64748b;
+          margin-top: 2px;
+        }
+        .header-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #ffffff;
+          text-align: right;
+          vertical-align: middle;
+        }
+        .header-subtitle {
+          font-size: 13px;
+          color: #94a3b8;
+          text-align: right;
+          margin-top: 3px;
+        }
+
+        /* Content */
+        .content {
+          padding: 32px 28px;
+          background: #ffffff;
+        }
+
+        /* Order meta */
+        .order-meta {
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 20px;
+          margin-bottom: 24px;
+        }
+        .order-meta-row {
           display: flex;
           justify-content: space-between;
-          margin: 12px 0;
-          padding: 10px 0;
+          padding: 7px 0;
+          font-size: 14px;
+          border-bottom: 1px solid #f1f5f9;
         }
-        .order-info-row:not(:last-child) {
-          border-bottom: 1px solid #e0f2fe;
-        }
-        .order-label { 
-          font-weight: 500;
-          color: #475569;
-        }
-        .order-value { 
-          font-weight: 600;
-          color: #0f172a;
-        }
-        .order-number { 
+        .order-meta-row:last-child { border-bottom: none; }
+        .meta-label { color: #64748b; }
+        .meta-value { font-weight: 600; color: #0f172a; }
+        .order-number {
           font-family: 'Courier New', monospace;
-          background: #fff;
-          padding: 4px 12px;
-          border-radius: 6px;
-          font-size: 15px;
-          color: #0369a1;
-          border: 1px solid #e0f2fe;
+          font-size: 13px;
+          color: #1e40af;
+          font-weight: 700;
         }
-        
+
         /* Greeting */
         .greeting {
           margin-bottom: 24px;
-        }
-        .greeting p {
-          margin: 8px 0;
           font-size: 15px;
           color: #475569;
         }
-        .greeting strong {
-          color: #0f172a;
-        }
-        
-        /* Products section */
-        .products-section { 
-          margin: 32px 0;
-        }
-        .products-section h2 { 
-          color: #0f172a;
-          font-size: 20px;
+        .greeting p { margin: 6px 0; }
+        .greeting strong { color: #0f172a; }
+
+        /* Products */
+        .products-section { margin: 24px 0; }
+        .products-section h2 {
+          font-size: 16px;
           font-weight: 600;
-          margin-bottom: 16px;
-        }
-        .products-table { 
-          width: 100%;
-          border-collapse: collapse;
-          background: white;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .products-table th { 
-          background: #f8fafc;
-          padding: 14px 16px;
-          text-align: left;
-          font-weight: 600;
-          color: #475569;
-          font-size: 13px;
+          color: #0f172a;
+          margin-bottom: 12px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          border-bottom: 2px solid #e2e8f0;
+          font-size: 13px;
+          color: #64748b;
         }
-        .products-table td { 
-          padding: 14px 16px;
-          border-bottom: 1px solid #f1f5f9;
-          font-size: 15px;
+        .products-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid #e2e8f0;
         }
-        .products-table tr:last-child td { 
-          border-bottom: none;
-        }
-        .products-table tbody tr:hover {
+        .products-table th {
           background: #f8fafc;
+          padding: 10px 14px;
+          text-align: left;
+          font-size: 12px;
+          font-weight: 600;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          border-bottom: 1px solid #e2e8f0;
         }
-        .total-row { 
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-          color: white;
-          font-weight: 700;
-          font-size: 18px;
+        .products-table td {
+          padding: 11px 14px;
+          border-bottom: 1px solid #f1f5f9;
+          font-size: 14px;
+          color: #0f172a;
+        }
+        .products-table tbody tr:last-child td { border-bottom: none; }
+        .total-row {
+          background: #334155;
+          color: #ffffff;
         }
         .total-row td {
+          padding: 12px 14px;
+          font-size: 15px;
+          font-weight: 700;
           border-bottom: none !important;
         }
-        
-        /* Next steps box */
-        .next-steps { 
-          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-          padding: 24px;
-          border-radius: 12px;
-          margin: 32px 0;
-          border: 1px solid #fde047;
+
+        /* Next steps */
+        .next-steps {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-left: 3px solid #1e40af;
+          padding: 18px 20px;
+          margin: 28px 0 0 0;
         }
-        .next-steps h3 { 
-          margin: 0 0 12px 0;
-          color: #854d0e;
-          font-size: 17px;
+        .next-steps h3 {
+          font-size: 14px;
           font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          color: #0f172a;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
         }
-        .next-steps p { 
+        .next-steps p {
+          font-size: 14px;
+          color: #475569;
+          line-height: 1.6;
           margin: 0;
-          color: #713f12;
-          font-size: 15px;
+        }
+
+        /* Footer */
+        .footer {
+          background: #334155;
+          padding: 20px 28px;
+        }
+        .footer-top {
+          border-bottom: 1px solid #475569;
+          padding-bottom: 14px;
+          margin-bottom: 14px;
+        }
+        .footer-contact {
+          font-size: 13px;
+          color: #64748b;
+          margin-top: 6px;
+        }
+        .footer-contact a { color: #94a3b8; text-decoration: none; }
+        .footer-legal {
+          font-size: 12px;
+          color: #475569;
           line-height: 1.6;
         }
-        
-        /* Contact section */
-        .contact-section {
-          margin-top: 32px;
-          padding-top: 24px;
-          border-top: 2px solid #e2e8f0;
-        }
-        .contact-section p {
-          margin: 8px 0;
-          font-size: 15px;
-          color: #475569;
-        }
-        .contact-info {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-top: 16px;
-        }
-        .contact-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          background: #f8fafc;
-          border-radius: 8px;
-          font-size: 14px;
-        }
-        .contact-item strong {
-          color: #0f172a;
-          min-width: 80px;
-        }
-        .contact-item a {
-          color: #0369a1;
-          text-decoration: none;
-        }
-        
-        /* Footer */
-        .footer { 
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-          padding: 32px 30px;
-          text-align: center;
-          color: #cbd5e1;
-        }
-        .footer-brand {
-          margin-bottom: 16px;
-        }
-        .footer-brand strong {
-          color: white;
-          font-size: 20px;
-          font-weight: 700;
-        }
-        .footer-brand-tagline {
-          color: #94a3b8;
-          font-size: 14px;
-          margin-top: 4px;
-        }
-        .footer p { 
-          margin: 8px 0;
-          font-size: 13px;
-          opacity: 0.8;
-        }
-        .footer-divider {
-          height: 1px;
-          background: rgba(255, 255, 255, 0.1);
-          margin: 20px 0;
-        }
-        
-        /* Responsive */
+
         @media only screen and (max-width: 600px) {
-          .header { padding: 30px 20px; }
-          .content { padding: 30px 20px; }
-          .footer { padding: 24px 20px; }
+          .header { padding: 16px 20px; }
+          .content { padding: 24px 20px; }
+          .footer { padding: 16px 20px; }
           .products-table th,
-          .products-table td { padding: 10px 12px; font-size: 14px; }
+          .products-table td { padding: 9px 10px; }
         }
       </style>
     </head>
     <body>
       <div class="container">
-        <!-- Header w stylu WaterLife -->
+
+        <!-- Header -->
         <div class="header">
-          <div class="header-icon">💧</div>
-          <h1>Dziękujemy za zamówienie!</h1>
-          <p>Otrzymaliśmy Twoje zapytanie ofertowe</p>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align: middle;">
+                <span style="font-size:22px; font-weight:700; color:#ffffff; letter-spacing:-0.3px;">${companyName}</span>
+              </td>
+              <td style="vertical-align: middle;">
+                <div class="header-title">Dziękujemy za zapytanie!</div>
+                <div class="header-subtitle">Potwierdzenie zapytania ofertowego</div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <div class="content">
-          <!-- Order info -->
-          <div class="order-info">
-            <h2>Potwierdzenie zamówienia</h2>
-            <div class="order-info-row">
-              <span class="order-label">Numer zamówienia:</span>
+
+          <!-- Order meta -->
+          <div class="order-meta">
+            <div class="order-meta-row">
+              <span class="meta-label">Nr zapytania</span>
               <span class="order-number">#${orderId.slice(0, 8).toUpperCase()}</span>
             </div>
-            <div class="order-info-row">
-              <span class="order-label">Data złożenia:</span>
-              <span class="order-value">${new Date(createdAt).toLocaleDateString('pl-PL', { 
-                year: 'numeric', 
-                month: 'long', 
+            <div class="order-meta-row">
+              <span class="meta-label">Data złożenia</span>
+              <span class="meta-value">${new Date(createdAt).toLocaleDateString('pl-PL', {
+                year: 'numeric',
+                month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -325,13 +282,13 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
 
           <!-- Greeting -->
           <div class="greeting">
-            <p>Cześć <strong>${customer.firstName}</strong>!</p>
-            <p>Potwierdzamy otrzymanie Twojego zapytania ofertowego. Poniżej znajdziesz szczegóły zamówienia:</p>
+            <p>Cześć <strong>${customer.firstName}</strong>,</p>
+            <p>potwierdzamy otrzymanie Twojego zapytania ofertowego. Poniżej znajdziesz szczegóły przesłanych produktów.</p>
           </div>
 
           <!-- Products -->
           <div class="products-section">
-            <h2>Wybrane produkty</h2>
+            <h2>Produkty w zapytaniu</h2>
             <table class="products-table">
               <thead>
                 <tr>
@@ -349,7 +306,7 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
                   </tr>
                 `).join('')}
                 <tr class="total-row">
-                  <td colspan="2" style="text-align: left;">SUMA CAŁKOWITA</td>
+                  <td colspan="2">Suma orientacyjna</td>
                   <td style="text-align: right;">${total.toLocaleString('pl-PL')} zł</td>
                 </tr>
               </tbody>
@@ -358,49 +315,43 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
 
           <!-- Next steps -->
           <div class="next-steps">
-            <h3>📋 Co dalej?</h3>
-            <p>Nasz zespół przeanalizuje Twoje zapytanie i <strong>skontaktuje się z Tobą w ciągu 24 godzin roboczych</strong> z indywidualną ofertą cenową dostosowaną do Twoich potrzeb.</p>
+            <h3>Co dalej?</h3>
+            <p>Nasz zespół przeanalizuje Twoje zapytanie i <strong>skontaktuje się z Tobą w ciągu 24 godzin roboczych</strong> z indywidualną ofertą dostosowaną do Twoich potrzeb.</p>
           </div>
 
-          <!-- Contact -->
-          <div class="contact-section">
-            <p>Masz dodatkowe pytania? Skontaktuj się z nami:</p>
-            <div class="contact-info">
-              <div class="contact-item">
-                <strong>Email:</strong>
-                <a href="mailto:biuro@waterlife.net.pl">biuro@waterlife.net.pl</a>
-              </div>
-              <div class="contact-item">
-                <strong>Telefon:</strong>
-                <span>+48 123 456 789</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-          <div class="footer-brand">
-            <strong>💧 WaterLife</strong>
-            <div class="footer-brand-tagline">Profesjonalne rozwiązania wodne</div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom: 1px solid #475569; padding-bottom: 12px; margin-bottom: 12px;">
+            <tr>
+              <td style="vertical-align: middle;">
+                <span style="font-size:18px; font-weight:700; color:#ffffff; letter-spacing:-0.3px;">${companyName}</span>
+              </td>
+              <td style="vertical-align: middle; text-align: right;">
+                <div class="footer-contact">
+                  ${contactEmail ? `<div><span style="color:#94a3b8;">E-mail:&nbsp;</span><a href="mailto:${contactEmail}" style="color:#94a3b8; text-decoration:none;">${contactEmail}</a></div>` : ''}
+                  ${contactPhone ? `<div><span style="color:#94a3b8;">Nr tel:&nbsp;</span><span style="color:#94a3b8;">${contactPhone}</span></div>` : ''}
+                </div>
+              </td>
+            </tr>
+          </table>
+          <div class="footer-legal">
+            <p>To jest automatyczna wiadomość potwierdzająca. Prosimy nie odpowiadać na ten email.</p>
+            <p style="margin-top: 4px;">© ${new Date().getFullYear()} Waterlife. Wszelkie prawa zastrzeżone.</p>
           </div>
-          <div class="footer-divider"></div>
-          <p>To jest automatyczna wiadomość potwierdzająca.</p>
-          <p>Prosimy nie odpowiadać na ten email.</p>
-          <p style="margin-top: 16px; font-size: 12px;">© ${new Date().getFullYear()} WaterLife. Wszelkie prawa zastrzeżone.</p>
         </div>
+
       </div>
     </body>
     </html>
   `;
 
   try {
-    const recipientEmail = customer.email;
-
     const result = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'WaterLife <onboarding@resend.dev>',
-      to: recipientEmail,
-      subject: `Potwierdzenie zamówienia #${orderId.slice(0, 8).toUpperCase()}`,
+      to: customer.email,
+      subject: `Potwierdzenie zapytania ofertowego #${orderId.slice(0, 8).toUpperCase()}`,
       html: emailHTML,
     });
 
