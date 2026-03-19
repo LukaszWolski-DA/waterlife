@@ -74,7 +74,7 @@ export function RichTextEditor({ value, onChange, className, hasError }: RichTex
     },
     editorProps: {
       attributes: {
-        class: 'min-h-[180px] px-3 py-2 text-sm focus:outline-none',
+        class: 'min-h-[180px] px-3 py-2 text-sm focus:outline-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5',
       },
     },
   });
