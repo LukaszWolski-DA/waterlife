@@ -5,57 +5,26 @@ import {
   sendCustomerOrderConfirmationEmail,
   sendOfficeOrderNotificationEmail
 } from '@/lib/email';
+import { zapytanieSchema } from '@/lib/schemas';
 
 /**
  * API endpoint dla zapytań ofertowych
  * POST - zapisuje zamówienie do bazy (orders + cart_items jako historia) i wysyła zapytanie ofertowe na email
  */
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  imageUrl?: string;
-}
-
-interface Customer {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  company?: string;
-  nip?: string;
-  message?: string;
-}
-
-interface RequestBody {
-  customer: Customer;
-  items: CartItem[];
-  total: number;
-  userId?: string;
-  isGuest?: boolean;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const body: RequestBody = await request.json();
-    const { customer, items, total, userId, isGuest = true } = body;
+    const body = await request.json();
+    const result = zapytanieSchema.safeParse(body);
 
-    // Walidacja danych
-    if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Brak wymaganych danych klienta' },
+        { success: false, error: result.error.errors[0].message },
         { status: 400 }
       );
     }
 
-    if (!items || items.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Koszyk jest pusty' },
-        { status: 400 }
-      );
-    }
+    const { customer, items, total, userId, isGuest = true } = result.data;
 
     const supabase = createServerClient();
 

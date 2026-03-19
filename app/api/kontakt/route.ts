@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { sendContactNotificationEmail, sendContactConfirmationEmail } from '@/lib/email';
 import { getHomepageContentServer } from '@/lib/homepage-server';
-import type { ContactFormData } from '@/types/contact';
+import { contactSchema } from '@/lib/schemas';
 
 /**
  * API endpoint dla formularza kontaktowego
@@ -10,40 +10,17 @@ import type { ContactFormData } from '@/types/contact';
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as ContactFormData;
+    const body = await request.json();
+    const result = contactSchema.safeParse(body);
 
-    const { name, email, phone, subject, message } = body;
-
-    // Walidacja wymaganych pól
-    if (!name || !name.trim()) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Imię i nazwisko jest wymagane' },
+        { success: false, error: result.error.errors[0].message },
         { status: 400 }
       );
     }
 
-    if (!email || !email.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Email jest wymagany' },
-        { status: 400 }
-      );
-    }
-
-    // Prosta walidacja email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { success: false, error: 'Nieprawidłowy format email' },
-        { status: 400 }
-      );
-    }
-
-    if (!message || !message.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Wiadomość jest wymagana' },
-        { status: 400 }
-      );
-    }
+    const { name, email, phone, subject, message } = result.data;
 
     // Zapisz wiadomość do Supabase (service role — omija RLS)
     const supabase = createServerClient();
