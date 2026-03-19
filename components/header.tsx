@@ -57,7 +57,7 @@ export function Header({
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
   const pathname = usePathname();
-  const isHomePage = pathname === '/';
+  const isHomePage = !pathname || pathname === '/';
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border">

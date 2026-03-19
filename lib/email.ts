@@ -117,13 +117,13 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
           margin-bottom: 24px;
         }
         .order-meta-row {
-          display: flex;
-          justify-content: space-between;
           padding: 7px 0;
           font-size: 14px;
           border-bottom: 1px solid #f1f5f9;
         }
         .order-meta-row:last-child { border-bottom: none; }
+        .order-meta-row td { padding: 0; vertical-align: middle; }
+        .order-meta-row td:last-child { text-align: right; }
         .meta-label { color: #64748b; }
         .meta-value { font-weight: 600; color: #0f172a; }
         .order-number {
@@ -186,6 +186,7 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
           font-size: 15px;
           font-weight: 700;
           border-bottom: none !important;
+          color: #ffffff;
         }
 
         /* Next steps */
@@ -263,22 +264,22 @@ export async function sendCustomerOrderConfirmationEmail(data: OrderEmailData) {
         <div class="content">
 
           <!-- Order meta -->
-          <div class="order-meta">
-            <div class="order-meta-row">
-              <span class="meta-label">Nr zapytania</span>
-              <span class="order-number">#${orderId.slice(0, 8).toUpperCase()}</span>
-            </div>
-            <div class="order-meta-row">
-              <span class="meta-label">Data złożenia</span>
-              <span class="meta-value">${new Date(createdAt).toLocaleDateString('pl-PL', {
+          <table class="order-meta" width="100%" cellpadding="0" cellspacing="0">
+            <tr class="order-meta-row">
+              <td class="meta-label">Nr zapytania</td>
+              <td><span class="order-number">#${orderId.slice(0, 8).toUpperCase()}</span></td>
+            </tr>
+            <tr class="order-meta-row">
+              <td class="meta-label">Data złożenia</td>
+              <td><span class="meta-value">${new Date(createdAt).toLocaleDateString('pl-PL', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
-              })}</span>
-            </div>
-          </div>
+              })}</span></td>
+            </tr>
+          </table>
 
           <!-- Greeting -->
           <div class="greeting">
