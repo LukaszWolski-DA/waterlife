@@ -4,13 +4,30 @@ import { sendContactNotificationEmail, sendContactConfirmationEmail } from '@/li
 import { getHomepageContentServer } from '@/lib/homepage-server';
 import { contactSchema } from '@/lib/schemas';
 
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 /**
  * API endpoint dla formularza kontaktowego
  * POST - wyślij wiadomość kontaktową i powiadom admina emailem
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
+
+    const body = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone') || undefined,
+      subject: formData.get('subject') || undefined,
+      message: formData.get('message'),
+    };
+
     const result = contactSchema.safeParse(body);
 
     if (!result.success) {
@@ -21,6 +38,33 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, phone, subject, message } = result.data;
+
+    // Walidacja załącznika
+    const file = formData.get('attachment');
+    let attachment: { filename: string; content: Buffer; contentType: string } | undefined;
+
+    if (file instanceof File && file.size > 0) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { success: false, error: 'Plik jest za duży (maksymalny rozmiar to 10MB)' },
+          { status: 400 }
+        );
+      }
+
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { success: false, error: 'Nieobsługiwany format pliku. Dozwolone: JPG, PNG, PDF, DOCX' },
+          { status: 400 }
+        );
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      attachment = {
+        filename: file.name,
+        content: Buffer.from(arrayBuffer),
+        contentType: file.type,
+      };
+    }
 
     // Zapisz wiadomość do Supabase (service role — omija RLS)
     const supabase = createServerClient();
@@ -72,6 +116,7 @@ export async function POST(request: NextRequest) {
         customerPhone: phone?.trim(),
         subject: subject?.trim(),
         message: message.trim(),
+        attachment,
       });
       await sendContactConfirmationEmail({
         customerName: name.trim(),

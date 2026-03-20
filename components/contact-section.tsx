@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, Paperclip } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { ContactInfo } from "@/types/homepage";
 import type { ContactFormData } from "@/types/contact";
@@ -23,10 +23,13 @@ interface ContactSectionProps {
 export function ContactSection({ content }: ContactSectionProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [showAttachment, setShowAttachment] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
+    subject: '',
     message: '',
   });
 
@@ -34,9 +37,26 @@ export function ContactSection({ content }: ContactSectionProps) {
     return null;
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    const allowed = ['.jpg', '.jpeg', '.png', '.pdf', '.docx'];
+    if (!allowed.some(ext => selected.name.toLowerCase().endsWith(ext))) {
+      toast({ title: 'Nieobsługiwany format pliku', description: 'Dozwolone: JPG, PNG, PDF, DOCX', variant: 'destructive' });
+      e.target.value = '';
+      return;
+    }
+    if (selected.size > 10 * 1024 * 1024) {
+      toast({ title: 'Plik za duży', description: 'Maksymalny rozmiar to 10 MB', variant: 'destructive' });
+      e.target.value = '';
+      return;
+    }
+    setFile(selected);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast({
         title: 'Błąd',
@@ -49,12 +69,17 @@ export function ContactSection({ content }: ContactSectionProps) {
     setLoading(true);
 
     try {
+      const fd = new FormData();
+      fd.append('name', formData.name);
+      fd.append('email', formData.email);
+      if (formData.phone) fd.append('phone', formData.phone);
+      if (formData.subject) fd.append('subject', formData.subject);
+      fd.append('message', formData.message);
+      if (file) fd.append('attachment', file);
+
       const response = await fetch('/api/kontakt', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: fd,
       });
 
       const result = await response.json();
@@ -64,14 +89,9 @@ export function ContactSection({ content }: ContactSectionProps) {
           title: 'Wiadomość wysłana!',
           description: 'Odpowiemy tak szybko, jak to możliwe.',
         });
-        
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          message: '',
-        });
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+        setFile(null);
+        setShowAttachment(false);
       } else {
         throw new Error(result.error || 'Nie udało się wysłać wiadomości');
       }
@@ -199,8 +219,8 @@ export function ContactSection({ content }: ContactSectionProps) {
                     >
                       Imię i nazwisko <span className="text-destructive">*</span>
                     </label>
-                    <Input 
-                      id="name" 
+                    <Input
+                      id="name"
                       placeholder="Jan Kowalski"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -215,9 +235,9 @@ export function ContactSection({ content }: ContactSectionProps) {
                     >
                       Email <span className="text-destructive">*</span>
                     </label>
-                    <Input 
-                      id="email" 
-                      type="email" 
+                    <Input
+                      id="email"
+                      type="email"
                       placeholder="jan@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -233,9 +253,9 @@ export function ContactSection({ content }: ContactSectionProps) {
                   >
                     Telefon
                   </label>
-                  <Input 
-                    id="phone" 
-                    type="tel" 
+                  <Input
+                    id="phone"
+                    type="tel"
                     placeholder="+48 123 456 789"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
@@ -244,11 +264,38 @@ export function ContactSection({ content }: ContactSectionProps) {
                 </div>
                 <div>
                   <label
-                    htmlFor="message"
+                    htmlFor="subject"
                     className="block text-sm font-medium text-foreground mb-2"
                   >
-                    Wiadomość <span className="text-destructive">*</span>
+                    Temat
                   </label>
+                  <Input
+                    id="subject"
+                    placeholder="Temat wiadomości"
+                    value={formData.subject}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-foreground"
+                    >
+                      Wiadomość <span className="text-destructive">*</span>
+                    </label>
+                    {!showAttachment && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAttachment(true)}
+                        className="text-sm text-primary flex items-center gap-1 hover:underline"
+                      >
+                        <Paperclip className="w-4 h-4" />
+                        Dodaj załącznik
+                      </button>
+                    )}
+                  </div>
                   <Textarea
                     id="message"
                     placeholder="Opisz swoje potrzeby..."
@@ -259,6 +306,48 @@ export function ContactSection({ content }: ContactSectionProps) {
                     required
                   />
                 </div>
+                {showAttachment && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label
+                        htmlFor="attachment"
+                        className="block text-sm font-medium text-foreground"
+                      >
+                        Załącznik (opcjonalnie)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => { setShowAttachment(false); setFile(null); }}
+                        className="text-sm text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Usuń
+                      </button>
+                    </div>
+                    <input
+                      id="attachment"
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf,.docx"
+                      onChange={handleFileChange}
+                      disabled={loading}
+                      className="sr-only"
+                    />
+                    <label
+                      htmlFor="attachment"
+                      className={`text-sm text-primary flex items-center gap-1 hover:underline cursor-pointer w-fit${loading ? ' pointer-events-none opacity-50' : ''}`}
+                    >
+                      <Paperclip className="w-4 h-4" />
+                      {file ? file.name : 'Wybierz plik'}
+                    </label>
+                    {file && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(file.size / 1024).toFixed(0)} KB
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG, PDF, DOCX (max 10 MB)
+                    </p>
+                  </div>
+                )}
                 <Button className="w-full" size="lg" type="submit" disabled={loading}>
                   <Send className="mr-2 h-4 w-4" />
                   {loading ? 'Wysyłanie...' : content.formButtonText}

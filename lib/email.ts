@@ -509,10 +509,15 @@ interface ContactNotificationData {
   customerPhone?: string;
   subject?: string;
   message: string;
+  attachment?: {
+    filename: string;
+    content: Buffer;
+    contentType: string;
+  };
 }
 
 export async function sendContactNotificationEmail(data: ContactNotificationData) {
-  const { messageId, customerName, customerEmail, customerPhone, subject, message } = data;
+  const { messageId, customerName, customerEmail, customerPhone, subject, message, attachment } = data;
 
   const emailHTML = `
     <!DOCTYPE html>
@@ -602,6 +607,7 @@ ${message}
       subject: `💬 Nowa wiadomość: ${customerName} - ${subject || 'Kontakt ze strony'}`,
       html: emailHTML,
       replyTo: customerEmail, // Ważne - admin może odpowiedzieć bezpośrednio
+      ...(attachment ? { attachments: [attachment] } : {}),
     });
 
     return { success: true, id: result.data?.id };
