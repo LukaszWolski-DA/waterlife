@@ -210,7 +210,7 @@ export default function ProductFilters({ onFilterChange }: ProductFiltersProps =
               value={localMinPrice}
               onChange={(e) => setLocalMinPrice(e.target.value)}
               min={0}
-              className="flex-1"
+              className="flex-1 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             <span className="text-muted-foreground">-</span>
             <Input
@@ -219,7 +219,7 @@ export default function ProductFilters({ onFilterChange }: ProductFiltersProps =
               value={localMaxPrice}
               onChange={(e) => setLocalMaxPrice(e.target.value)}
               min={0}
-              className="flex-1"
+              className="flex-1 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">

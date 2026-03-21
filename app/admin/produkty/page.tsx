@@ -312,6 +312,7 @@ export default function AdminProductsPage() {
                               src={getMainImageUrl(product)!}
                               alt={product.name}
                               fill
+                              sizes="64px"
                               className="object-contain"
                             />
                           ) : (

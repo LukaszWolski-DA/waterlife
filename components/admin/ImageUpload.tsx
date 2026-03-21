@@ -141,6 +141,7 @@ export function ImageUpload({ value, onChange, onRemove }: ImageUploadProps) {
               src={preview}
               alt="Product preview"
               fill
+              sizes="320px"
               className="object-contain"
             />
           </div>

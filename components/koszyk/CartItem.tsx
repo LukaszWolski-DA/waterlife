@@ -36,6 +36,7 @@ export default function CartItem({ item, onRemove, onUpdateQuantity }: CartItemP
               src={item.imageUrl}
               alt={item.name}
               fill
+              sizes="96px"
               className="object-contain rounded-lg"
             />
           ) : (
@@ -78,7 +79,7 @@ export default function CartItem({ item, onRemove, onUpdateQuantity }: CartItemP
             min="1"
             value={item.quantity}
             onChange={(e) => onUpdateQuantity(item.id, parseInt(e.target.value) || 1)}
-            className="w-16 text-center"
+            className="w-16 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <Button
             variant="outline"

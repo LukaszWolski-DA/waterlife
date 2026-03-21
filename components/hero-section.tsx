@@ -42,6 +42,7 @@ export function HeroSection({ content }: HeroSectionProps) {
           src="/images/hero-heating.jpg"
           alt="Nowoczesne ogrzewanie domu"
           fill
+          sizes="100vw"
           className="object-cover opacity-40"
           priority
         />

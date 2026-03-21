@@ -273,7 +273,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
                 min="0"
                 value={formData.price}
                 onChange={handleChange}
-                className={errors.price ? 'border-destructive' : ''}
+                className={`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none${errors.price ? ' border-destructive' : ''}`}
               />
               {errors.price && (
                 <p className="mt-1 text-sm text-destructive">{errors.price}</p>
@@ -291,7 +291,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
                 min="0"
                 value={formData.stock}
                 onChange={handleChange}
-                className={errors.stock ? 'border-destructive' : ''}
+                className={`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none${errors.stock ? ' border-destructive' : ''}`}
               />
               {errors.stock && (
                 <p className="mt-1 text-sm text-destructive">{errors.stock}</p>

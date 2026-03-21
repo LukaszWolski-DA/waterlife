@@ -53,6 +53,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             src={images[selectedIndex].url}
             alt={productName}
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-contain"
             priority
           />
@@ -85,6 +86,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   src={image.url}
                   alt={`${productName} - miniatura ${index + 1}`}
                   fill
+                  sizes="96px"
                   className="object-contain"
                 />
               ) : (
