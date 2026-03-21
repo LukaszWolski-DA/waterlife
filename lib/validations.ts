@@ -13,6 +13,12 @@ export const productImageSchema = z.object({
 
 export type ProductImageInput = z.infer<typeof productImageSchema>;
 
+// Schema pojedynczego parametru technicznego
+export const productSpecificationSchema = z.object({
+  key: z.string().min(1),
+  value: z.string().min(1),
+});
+
 // Schema produktu
 export const productSchema = z.object({
   name: z.string().min(3, 'Nazwa musi mieć minimum 3 znaki'),
@@ -29,6 +35,7 @@ export const productSchema = z.object({
       'Dokładnie jedno zdjęcie musi być oznaczone jako główne'
     )
     .optional(),
+  specifications: z.array(productSpecificationSchema).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
