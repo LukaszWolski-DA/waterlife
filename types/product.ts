@@ -8,6 +8,12 @@ export interface ProductImage {
   isMain: boolean;
 }
 
+// Struktura pojedynczego parametru technicznego produktu
+export interface ProductSpecification {
+  key: string;
+  value: string;
+}
+
 // Helper do pobierania głównego zdjęcia
 export function getMainImage(product: Product): string | undefined {
   if (product.images && product.images.length > 0) {
@@ -28,6 +34,7 @@ export interface Product {
   imageUrl?: string;      // Legacy - zachowane dla kompatybilności
   images?: ProductImage[]; // Nowa struktura z wieloma zdjęciami
   featured?: boolean; // Czy produkt jest wyróżniony
+  specifications?: ProductSpecification[];
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
@@ -43,6 +50,7 @@ export interface ProductFormData {
   imageUrl?: string;      // Legacy - zachowane dla kompatybilności
   images?: ProductImage[]; // Nowa struktura z wieloma zdjęciami
   featured?: boolean;     // Czy produkt jest Bestseller
+  specifications?: ProductSpecification[];
 }
 
 export interface ProductFilter {

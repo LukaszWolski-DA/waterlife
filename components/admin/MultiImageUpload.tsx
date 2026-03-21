@@ -154,6 +154,7 @@ export function MultiImageUpload({
                     src={image.url}
                     alt={`Zdjęcie ${index + 1}`}
                     fill
+                    sizes="128px"
                     className="object-contain"
                   />
                 ) : (

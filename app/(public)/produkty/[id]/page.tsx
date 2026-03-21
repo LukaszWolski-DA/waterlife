@@ -171,6 +171,28 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       </div>
 
+      {/* Parametry techniczne */}
+      {product.specifications && product.specifications.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Parametry techniczne</h2>
+          <div className="overflow-hidden rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <tbody>
+                {product.specifications.map((spec, index) => (
+                  <tr
+                    key={index}
+                    className={index % 2 === 0 ? 'bg-muted/50' : 'bg-background'}
+                  >
+                    <td className="py-3 px-4 font-medium w-1/3">{spec.key}</td>
+                    <td className="py-3 px-4 text-muted-foreground">{spec.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Powiązane produkty */}
       {relatedProducts.length > 0 && (
         <div>
@@ -186,6 +208,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                           src={relatedProduct.imageUrl}
                           alt={relatedProduct.name}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                           className="object-contain group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>

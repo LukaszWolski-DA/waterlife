@@ -62,6 +62,7 @@ export function CategoriesSection({ intro, cards }: CategoriesSectionProps) {
                         src={card.image || "/placeholder.svg"}
                         alt={card.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/20 to-transparent" />

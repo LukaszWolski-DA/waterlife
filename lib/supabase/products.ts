@@ -182,6 +182,7 @@ export async function createProductServer(data: ProductFormData): Promise<Produc
     manufacturer_id: manufacturerId,
     images: data.images || [],
     featured: data.featured || false,
+    specifications: (data.specifications || []).filter(s => s.key.trim() && s.value.trim()),
     status: data.stock > 0 ? 'active' : 'inactive',
   };
 
@@ -235,6 +236,7 @@ export async function updateProductServer(
 
   if (data.images !== undefined) updates.images = data.images;
   if (data.featured !== undefined) updates.featured = data.featured;
+  if (data.specifications !== undefined) updates.specifications = data.specifications.filter(s => s.key.trim() && s.value.trim());
 
   const { data: updated, error } = await supabase
     .from('products')
@@ -420,6 +422,11 @@ function mapDbToProduct(dbProduct: any): Product {
     ? dbProduct.images
     : [];
 
+  // Parsuj specifications JSONB
+  const specifications = Array.isArray(dbProduct.specifications)
+    ? dbProduct.specifications
+    : [];
+
   // Znajdź główne zdjęcie dla kompatybilności wstecznej
   const mainImage = images.find((img) => img.isMain);
   const imageUrl = mainImage?.url || images[0]?.url || undefined;
@@ -435,6 +442,7 @@ function mapDbToProduct(dbProduct: any): Product {
     imageUrl: imageUrl,
     images: images,
     featured: dbProduct.featured || false,
+    specifications: specifications.length > 0 ? specifications : undefined,
     status: dbProduct.status as 'active' | 'inactive',
     createdAt: dbProduct.created_at,
     updatedAt: dbProduct.updated_at,

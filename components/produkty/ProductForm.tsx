@@ -24,7 +24,8 @@ import { productSchema } from '@/lib/validations';
 import type { ProductFormData } from '@/types/product';
 import { z } from 'zod';
 import { MultiImageUpload } from '@/components/admin/MultiImageUpload';
-import type { ProductImage } from '@/types/product';
+import { SpecificationsEditor } from '@/components/produkty/SpecificationsEditor';
+import type { ProductImage, ProductSpecification } from '@/types/product';
 
 /**
  * Formularz dodawania/edycji produktu
@@ -58,6 +59,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     imageUrl: '',
     images: [],
     featured: false,
+    specifications: [],
   });
 
   // Load categories, manufacturers and product data
@@ -92,6 +94,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
               imageUrl: product.imageUrl || '',
               images: images,
               featured: product.featured || false,
+              specifications: product.specifications || [],
             });
           }
         }
@@ -273,7 +276,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
                 min="0"
                 value={formData.price}
                 onChange={handleChange}
-                className={errors.price ? 'border-destructive' : ''}
+                className={`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none${errors.price ? ' border-destructive' : ''}`}
               />
               {errors.price && (
                 <p className="mt-1 text-sm text-destructive">{errors.price}</p>
@@ -291,7 +294,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
                 min="0"
                 value={formData.stock}
                 onChange={handleChange}
-                className={errors.stock ? 'border-destructive' : ''}
+                className={`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none${errors.stock ? ' border-destructive' : ''}`}
               />
               {errors.stock && (
                 <p className="mt-1 text-sm text-destructive">{errors.stock}</p>
@@ -399,6 +402,13 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
               <p className="mt-1 text-sm text-destructive">{errors.images}</p>
             )}
           </div>
+
+          <SpecificationsEditor
+            value={formData.specifications || []}
+            onChange={(specs: ProductSpecification[]) =>
+              setFormData((prev) => ({ ...prev, specifications: specs }))
+            }
+          />
 
           <div className="flex items-center space-x-2">
             <Checkbox
