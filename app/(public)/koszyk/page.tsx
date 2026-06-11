@@ -110,7 +110,7 @@ export default function CartPage() {
           customer: formData,
           items,
           total,
-          userId: user?.id || null,
+          userId: user?.id ?? undefined,
           isGuest: !isAuthenticated,
         }),
       });
