@@ -1,0 +1,11 @@
+{
+  "markdown-pdf.styles": ["docs/uat/uat-styles.css"],
+  "markdown-pdf.highlightStyle": "github",
+  "markdown-pdf.displayHeaderFooter": true,
+  "markdown-pdf.headerTemplate": "<div style=\"font-size: 9pt; margin-left: 15mm; color: #94a3b8; font-family: Arial, sans-serif;\">WaterLife — UAT Checklist</div>",
+  "markdown-pdf.footerTemplate": "<div style=\"font-size: 9pt; width: 100%; text-align: center; color: #94a3b8; font-family: Arial, sans-serif;\"><span class='pageNumber'></span> / <span class='totalPages'></span></div>",
+  "markdown-pdf.margin.top": "25mm",
+  "markdown-pdf.margin.bottom": "20mm",
+  "markdown-pdf.margin.left": "15mm",
+  "markdown-pdf.margin.right": "15mm"
+}

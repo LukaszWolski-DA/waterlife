@@ -42,3 +42,6 @@ nul
 # Sensitive files
 docs/pwds
 proxy.ts
+
+# UAT screenshots (binary files, kept locally only)
+docs/uat/**/screenshots/
