@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,15 @@ export function Header({
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
   const pathname = usePathname();
-  const isHomePage = !pathname || pathname === '/';
+
+  // Nie ufaj usePathname() z pierwszego (SSR/ISR) renderu - na Vercelu
+  // cache'owany prerender potrafi zapisać złą wartość dla '/'. Po zamontowaniu
+  // czytamy ścieżkę bezpośrednio z działającego routera w przeglądarce.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const isHomePage = !mounted || pathname === '/';
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border">
