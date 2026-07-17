@@ -6,8 +6,10 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
+import Superscript from '@tiptap/extension-superscript';
+import Subscript from '@tiptap/extension-subscript';
 import { useEffect, useCallback } from 'react';
-import { Bold, Italic, Link as LinkIcon, Unlink, Underline as UnderlineIcon, List, AArrowUp, AArrowDown } from 'lucide-react';
+import { Bold, Italic, Link as LinkIcon, Unlink, Underline as UnderlineIcon, List, AArrowUp, AArrowDown, Superscript as SuperscriptIcon, Subscript as SubscriptIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -66,6 +68,8 @@ export function RichTextEditor({ value, onChange, className, hasError }: RichTex
       Underline,
       TextStyle,
       FontSize,
+      Superscript,
+      Subscript,
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -153,6 +157,30 @@ export function RichTextEditor({ value, onChange, className, hasError }: RichTex
           title="Podkreślenie (Ctrl+U)"
         >
           <UnderlineIcon className="h-3.5 w-3.5" />
+        </Button>
+
+        <div className="mx-1 h-4 w-px bg-border" />
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className={cn('h-7 w-7 p-0', editor.isActive('superscript') && 'bg-muted')}
+          onClick={() => editor.chain().focus().toggleSuperscript().run()}
+          title="Indeks górny (np. m²)"
+        >
+          <SuperscriptIcon className="h-3.5 w-3.5" />
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className={cn('h-7 w-7 p-0', editor.isActive('subscript') && 'bg-muted')}
+          onClick={() => editor.chain().focus().toggleSubscript().run()}
+          title="Indeks dolny (np. CO₂)"
+        >
+          <SubscriptIcon className="h-3.5 w-3.5" />
         </Button>
 
         <div className="mx-1 h-4 w-px bg-border" />

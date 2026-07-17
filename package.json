@@ -48,6 +48,8 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tiptap/core": "^3.20.0",
     "@tiptap/extension-link": "^3.20.0",
+    "@tiptap/extension-subscript": "^3.20.0",
+    "@tiptap/extension-superscript": "^3.20.0",
     "@tiptap/extension-text-style": "^3.20.0",
     "@tiptap/extension-underline": "^3.20.0",
     "@tiptap/react": "^3.20.0",
