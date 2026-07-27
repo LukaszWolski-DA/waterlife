@@ -38,7 +38,7 @@ export default function Zwroty() {
         <section>
           <h2 className="text-xl font-semibold mb-3">Jak złożyć zwrot?</h2>
           <ol className="list-decimal pl-6 space-y-2">
-            <li>Skontaktuj się z nami: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub tel. 535-430-854.</li>
+            <li>Skontaktuj się z nami: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a> lub tel. 535-430-854.</li>
             <li>Poinformuj nas o chęci zwrotu i podaj numer zamówienia.</li>
             <li>Odeślij towar na adres wskazany przez obsługę klienta.</li>
             <li>Po otrzymaniu i sprawdzeniu paczki zwrócimy należność w ciągu 14 dni roboczych.</li>
@@ -50,8 +50,8 @@ export default function Zwroty() {
           <p>
             Reklamacje rozpatrujemy przeważnie w terminie do <strong>14 dni roboczych</strong> od
             ich otrzymania. W przypadku reklamacji prosimy o kontakt pod adresem{' '}
-            <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">
-              biuro@waterlife.net.pl
+            <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">
+              sklep@waterlife.net.pl
             </a>{' '}
             lub telefonicznie: 535-430-854 (pon.–pt. 9:00–15:00).
           </p>

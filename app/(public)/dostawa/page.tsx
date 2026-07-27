@@ -56,8 +56,8 @@ export default function Dostawa() {
           <h2 className="text-xl font-semibold mb-3">Pytania o dostawę?</h2>
           <p>
             Skontaktuj się z nami:{' '}
-            <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">
-              biuro@waterlife.net.pl
+            <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">
+              sklep@waterlife.net.pl
             </a>{' '}
             lub tel. 535-430-854 (pon.–pt. 9:00–15:00).
           </p>

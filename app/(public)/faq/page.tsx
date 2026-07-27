@@ -74,8 +74,8 @@ const faqs: { question: string; answer: React.ReactNode }[] = [
     answer: (
       <>
         Możesz napisać na{' '}
-        <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">
-          biuro@waterlife.net.pl
+        <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">
+          sklep@waterlife.net.pl
         </a>
         , zadzwonić pod numer <strong>535-430-854</strong> lub skorzystać z{' '}
         <a href="/#contact" className="text-primary underline">formularza kontaktowego</a>{' '}
@@ -104,8 +104,8 @@ export default function FAQ() {
         <p className="font-medium mb-1">Nie znalazłeś odpowiedzi?</p>
         <p className="text-muted-foreground text-sm">
           Napisz do nas na{' '}
-          <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">
-            biuro@waterlife.net.pl
+          <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">
+            sklep@waterlife.net.pl
           </a>{' '}
           lub zadzwoń: 535-430-854 (pon.–pt. 9:00–15:00).
         </p>

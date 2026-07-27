@@ -33,7 +33,7 @@ export default function Gwarancja() {
         <section>
           <h2 className="text-xl font-semibold mb-3">Jak zgłosić reklamację gwarancyjną?</h2>
           <ol className="list-decimal pl-6 space-y-2">
-            <li>Skontaktuj się z nami: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub tel. 535-430-854.</li>
+            <li>Skontaktuj się z nami: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a> lub tel. 535-430-854.</li>
             <li>Przygotuj dowód zakupu (paragon lub fakturę VAT) oraz opis usterki.</li>
             <li>Po weryfikacji zgłoszenia poinformujemy Cię o dalszych krokach.</li>
             <li>Reklamacje rozpatrujemy w terminie do <strong>14 dni roboczych</strong>.</li>
@@ -46,7 +46,7 @@ export default function Gwarancja() {
             Jesteśmy dostępni od poniedziałku do piątku w godzinach <strong>9:00–15:00</strong>:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>E-mail: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a></li>
+            <li>E-mail: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a></li>
             <li>Telefon: 535-430-854</li>
           </ul>
         </section>

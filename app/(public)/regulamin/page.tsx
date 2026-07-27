@@ -88,7 +88,7 @@ export default function Regulamin() {
           <h2 className="text-xl font-semibold mb-3">§7. Gwarancja i reklamacje</h2>
           <ol className="list-decimal pl-6 space-y-2">
             <li>Jeżeli producent nie wystawia kart gwarancyjnych, podstawą gwarancji jest dowód zakupu (paragon lub faktura VAT).</li>
-            <li>Reklamacje należy kierować na adres e-mail: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub telefonicznie: 535-430-854.</li>
+            <li>Reklamacje należy kierować na adres e-mail: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a> lub telefonicznie: 535-430-854.</li>
             <li>Obsługa klienta dostępna jest w godzinach: poniedziałek–piątek 9:00–15:00.</li>
           </ol>
         </section>

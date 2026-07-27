@@ -21,7 +21,7 @@ export default function PolitykaPrywatnosci() {
             NIP: <strong>9151800128</strong>, REGON: <strong>365904380</strong>.
           </p>
           <p className="mt-2">
-            Kontakt z administratorem: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a> lub tel. 535-430-854.
+            Kontakt z administratorem: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a> lub tel. 535-430-854.
           </p>
         </section>
 
@@ -96,7 +96,7 @@ export default function PolitykaPrywatnosci() {
             <li><strong>Prawo do cofnięcia zgody</strong> — w dowolnym momencie, bez wpływu na zgodność z prawem przetwarzania przed cofnięciem</li>
           </ul>
           <p className="mt-3">
-            Aby skorzystać z tych praw, skontaktuj się z nami pod adresem: <a href="mailto:biuro@waterlife.net.pl" className="text-primary underline">biuro@waterlife.net.pl</a>.
+            Aby skorzystać z tych praw, skontaktuj się z nami pod adresem: <a href="mailto:sklep@waterlife.net.pl" className="text-primary underline">sklep@waterlife.net.pl</a>.
             Masz również prawo złożyć skargę do organu nadzorczego — <strong>Prezesa Urzędu Ochrony Danych Osobowych (UODO)</strong>, ul. Stawki 2, 00-193 Warszawa.
           </p>
         </section>
