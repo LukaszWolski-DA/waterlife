@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatPrice } from '@/lib/format-price';
+import { stripHtmlToText } from '@/lib/strip-html';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart } from 'lucide-react';
@@ -84,7 +85,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
         {product.description && (
           <p className="text-sm text-gray-600 line-clamp-2">
-            {product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
+            {stripHtmlToText(product.description)}
           </p>
         )}
       </CardContent>
