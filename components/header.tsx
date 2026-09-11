@@ -119,7 +119,7 @@ export function Header({
                 Waterlife
               </span>
               <span className="hidden sm:block text-xs text-muted-foreground">
-                Technika grzewcza i sanitarna
+                Technika grzewcza i sanitarna. Systemy nawadniające
               </span>
             </div>
           </Link>
